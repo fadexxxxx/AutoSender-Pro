@@ -4177,8 +4177,8 @@
         .admin-back-btn.password-setting-btn {
             background: linear-gradient(135deg, rgba(139, 0, 255, 0.8) 0%, rgba(139, 0, 255, 0.6) 100%);
             color: white;
-            padding: 10px 18px;
-            font-size: 13px;
+            padding: 12px 25px;
+            font-size: 14px;
             width: auto;
             min-width: auto;
         }
@@ -6420,49 +6420,57 @@
     <!--#region 积分充值面板 HTML -->
     <!-- ==================== 积分充值面板 ==================== -->
     <div class="custom-modal-overlay" id="rechargeModal" style="display: none;">
-        <div class="custom-modal-panel" style="width: 90%; max-width: 1200px; max-height: 90vh; overflow-y: auto;">
+        <div class="custom-modal-panel" style="width: 70%; max-width: 800px; height: 85vh; max-height: 85vh; overflow-y: auto;">
             <div class="custom-modal-header">
                 <span class="custom-modal-title">💰 积分充值</span>
                 <button class="custom-modal-close" onclick="closeRechargeModal()">×</button>
             </div>
-            <div class="custom-modal-content" style="padding: 20px;">
+            <div class="custom-modal-content" style="padding: 20px; display: flex; flex-direction: column; height: calc(85vh - 100px);">
                 <!-- 第一行：用户ID输入、验证按钮、充值输入、确定按钮 -->
-                <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 20px; flex-wrap: wrap;">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <label style="font-weight: bold; white-space: nowrap;">用户ID:</label>
-                        <input type="text" class="custom-modal-input" id="rechargeUserIdInput" placeholder="请输入用户ID" style="width: 200px;">
-                        <button class="custom-modal-btn" onclick="verifyRechargeUser()" style="white-space: nowrap;">验证</button>
+                <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <label style="font-weight: bold; white-space: nowrap; font-size: 14px;">用户ID:</label>
+                        <input type="text" class="custom-modal-input" id="rechargeUserIdInput" placeholder="请输入用户ID" style="width: 180px;">
+                        <button class="custom-modal-btn" onclick="verifyRechargeUser()" style="white-space: nowrap; padding: 8px 15px;">验证</button>
                     </div>
-                    <div style="flex: 1; min-width: 200px;"></div>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <label style="font-weight: bold; white-space: nowrap;">充值:</label>
-                        <input type="number" class="custom-modal-input" id="rechargeAmountInput" placeholder="充值金额" style="width: 150px;" min="0.01" step="0.01">
-                        <button class="custom-modal-btn confirm" onclick="confirmRecharge()" style="white-space: nowrap;">确定</button>
+                    <div style="width: 20px;"></div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <label style="font-weight: bold; white-space: nowrap; font-size: 14px;">充值:</label>
+                        <input type="number" class="custom-modal-input" id="rechargeAmountInput" placeholder="充值金额" style="width: 120px;" min="0.01" step="0.01">
+                        <button class="custom-modal-btn confirm" onclick="confirmRecharge()" style="white-space: nowrap; padding: 8px 15px;">确定</button>
                     </div>
                 </div>
                 
-                <!-- 第二行：用户信息显示区域（两行高度） -->
-                <div id="rechargeUserInfo" style="display: none; padding: 20px; background: #f5f5f5; border-radius: 8px; margin-bottom: 20px; min-height: 100px; border: 1px solid #ddd;">
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; align-items: center;">
-                        <div style="display: flex; flex-direction: column; gap: 5px;">
-                            <strong style="color: #666; font-size: 13px;">用户ID:</strong>
-                            <span id="rechargeInfoUserId" style="color: #333; font-size: 16px; font-weight: bold;">-</span>
+                <!-- 第二行：用户信息显示区域（固定高度，两行布局） -->
+                <div id="rechargeUserInfo" style="display: none; padding: 15px; background: #f5f5f5; border-radius: 8px; margin-bottom: 15px; height: 120px; border: 1px solid #ddd; overflow: hidden;">
+                    <!-- 第一行：用户ID、用户编号、注册时间 -->
+                    <div style="display: flex; gap: 30px; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #ddd;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <strong style="color: #666; font-size: 13px; white-space: nowrap;">用户ID:</strong>
+                            <span id="rechargeInfoUserId" style="color: #333; font-size: 14px; font-weight: bold;">-</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; gap: 5px;">
-                            <strong style="color: #666; font-size: 13px;">余额:</strong>
-                            <span id="rechargeInfoCredits" style="color: #4CAF50; font-size: 16px; font-weight: bold;">-</span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <strong style="color: #666; font-size: 13px; white-space: nowrap;">用户编号:</strong>
+                            <span id="rechargeInfoUsername" style="color: #333; font-size: 14px; font-weight: bold;">-</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; gap: 5px;">
-                            <strong style="color: #666; font-size: 13px;">上次充值:</strong>
-                            <span id="rechargeInfoLastRecharge" style="color: #333; font-size: 14px;">-</span>
-                        </div>
-                        <div style="display: flex; flex-direction: column; gap: 5px;">
-                            <strong style="color: #666; font-size: 13px;">总消费:</strong>
-                            <span id="rechargeInfoTotalSpent" style="color: #FF9800; font-size: 16px; font-weight: bold;">-</span>
-                        </div>
-                        <div style="display: flex; flex-direction: column; gap: 5px;">
-                            <strong style="color: #666; font-size: 13px;">创建日期:</strong>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <strong style="color: #666; font-size: 13px; white-space: nowrap;">注册时间:</strong>
                             <span id="rechargeInfoCreated" style="color: #333; font-size: 14px;">-</span>
+                        </div>
+                    </div>
+                    <!-- 第二行：余额、上次充值、总消费 -->
+                    <div style="display: flex; gap: 30px; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <strong style="color: #666; font-size: 13px; white-space: nowrap;">余额:</strong>
+                            <span id="rechargeInfoCredits" style="color: #4CAF50; font-size: 14px; font-weight: bold;">-</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <strong style="color: #666; font-size: 13px; white-space: nowrap;">上次充值:</strong>
+                            <span id="rechargeInfoLastRecharge" style="color: #333; font-size: 13px;">-</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <strong style="color: #666; font-size: 13px; white-space: nowrap;">总消费:</strong>
+                            <span id="rechargeInfoTotalSpent" style="color: #FF9800; font-size: 14px; font-weight: bold;">-</span>
                         </div>
                     </div>
                 </div>
@@ -6511,24 +6519,8 @@
                 </div>
             </div>
 
-            <!-- 服务器状态说明 -->
+            <!-- 可连接服务器列表 -->
             <div class="server-manager-section">
-                <h3>ℹ️ 服务器状态说明</h3>
-                <div style="padding: 15px; background: #f5f5f5; border-radius: 8px; margin-bottom: 20px;">
-                    <p style="margin: 0 0 10px 0; color: #666;">
-                        <strong>API 模式：</strong>服务器通过后端 API 自动注册和管理，无需手动连接。
-                    </p>
-                    <p style="margin: 0; color: #666;">
-                        服务器状态由后端根据心跳自动更新：
-                    </p>
-                    <ul style="margin: 10px 0 0 20px; color: #666;">
-                        <li><strong>已连接</strong>：服务器在线且有客户端连接</li>
-                        <li><strong>可连接(空闲)</strong>：服务器在线但无客户端连接，可分配使用</li>
-                        <li><strong>已断开</strong>：服务器超过 120 秒未发送心跳</li>
-                    </ul>
-                </div>
-
-                <!-- 可连接服务器列表 -->
                 <div class="server-list-section">
                     <div class="server-list-label">可连接(空闲):</div>
                     <div class="server-buttons-grid" id="availableServers">
@@ -8829,6 +8821,7 @@
                 
                 // 显示用户信息
                 document.getElementById('rechargeInfoUserId').textContent = userId;
+                document.getElementById('rechargeInfoUsername').textContent = userData?.username || '-';
                 document.getElementById('rechargeInfoCredits').textContent = credits.toFixed(2);
                 if (lastRecharge) {
                     const lastRechargeTime = lastRecharge.ts ? new Date(lastRecharge.ts).toLocaleString('zh-CN', { 
