@@ -6904,7 +6904,7 @@
         }
 
         // 切换到管理员登录表单（双向切换）
-        function switchToAdmin() {
+        window.switchToAdmin = function switchToAdmin() {
             const loginPanel = document.getElementById('loginPanel');
             const adminToggle = document.getElementById('adminToggle');
             const isAdminMode = loginPanel.classList.contains('admin-mode');
@@ -7325,7 +7325,7 @@
 
         // ==================== 管理员弹窗 ====================
         // 显示管理员密码弹窗
-        function showAdminModal() {
+        window.showAdminModal = function showAdminModal() {
             const modal = document.getElementById('adminModal');
             if (!modal) return;
             
@@ -12347,7 +12347,7 @@
         });
 
         // 清空收件箱功能
-        function clearInbox() {
+        async function clearInbox() {
             // 获取当前所有对话的ID
             const allChatIds = Array.from(document.querySelectorAll('.contact-item')).map(item => item.dataset.chatId).filter(id => id);
 
