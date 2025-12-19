@@ -7828,7 +7828,7 @@
                                 });
                                 if (resp.ok) {
                                     const backendData = await resp.json();
-                                    const backends = backendData?.backend_servers;
+                                    const backends = backendData?.backend_servers || backendData?.backends || backendData?.backendServers;
                                     if (Array.isArray(backends) && backends.length > 0) {
                                         servers = backends.map(b => ({
                                             server_id: b.server_id || b.id || b.backend_id || b.name,
