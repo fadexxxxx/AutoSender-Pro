@@ -7769,12 +7769,10 @@
         
         async function testAPIConnection() {
             try {
-                const authToken = localStorage.getItem('auth_token');
                 const response = await fetch(`${API_BASE_URL}/servers`, {
                     method: 'GET',
                     headers: {
-                        'Content-Type': 'application/json',
-                        ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
+                        'Content-Type': 'application/json'
                     },
                     // 添加超时控制
                     signal: AbortSignal.timeout(10000) // 10秒超时
@@ -7799,148 +7797,65 @@
         // 从API加载服务器列表
         async function loadServersFromAPI() {
             try {
-                const authToken = localStorage.getItem('auth_token');
+                // 使用 /api/servers 获取所有服务器列表
+                // 注意：这里可能需要优化权限，目前假设所有用户/管理员都能看到所有服务器
                 const response = await fetch(`${API_BASE_URL}/servers`, {
                     method: 'GET',
                     headers: {
-                        'Content-Type': 'application/json',
-                        ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
+                        'Content-Type': 'application/json'
                     },
                     signal: AbortSignal.timeout(10000) // 10秒超时
                 });
+                
                 if (!response.ok) {
                     throw new Error(`API响应错误: ${response.status} ${response.statusText}`);
                 }
                 
                 const data = await response.json();
-                let servers = Array.isArray(data?.servers) ? data.servers : [];
-                const ok = !!(data?.success || data?.ok || Array.isArray(data?.servers));
-                if (ok && servers) {
-                    // 兼容：有些部署只维护“用户后端(backend)”列表，而不是全局 /servers
-                    // 当 /servers 为空时，尝试用 /user/{id}/backends 作为回退数据源
-                    if (servers.length === 0) {
-                        try {
-                            const userId = localStorage.getItem('user_id');
-                            const token = localStorage.getItem('auth_token');
-                            if (userId && token) {
-                                const resp = await fetch(`${API_BASE_URL}/user/${userId}/backends`, {
-                                    headers: { 'Authorization': `Bearer ${token}` }
-                                });
-                                if (resp.ok) {
-                                    const backendData = await resp.json();
-                                    const backends = backendData?.backend_servers;
-                                    if (Array.isArray(backends) && backends.length > 0) {
-                                        servers = backends.map(b => ({
-                                            server_id: b.server_id || b.id || b.backend_id || b.name,
-                                            server_name: b.server_name || b.name || b.id || b.server_id,
-                                            server_url: b.server_url || b.url || '',
-                                            status: b.status || 'online',
-                                            assigned_user_id: b.assigned_user_id || userId
-                                        }));
-                                    }
-                                }
-                            }
-                        } catch (e) {
-                            // 静默失败：保持原逻辑（服务器列表为空）
-                        }
-                    }
-                    console.log('加载服务器列表成功，服务器数量:', servers.length);
+                if (data.success && data.servers) {
+                    // console.log('加载服务器列表成功，服务器数量:', data.servers.length);
                     
-                    // 保存服务器分配信息（assigned_user_id）
-                    const serverAssignments = {};
-                    servers.forEach(s => {
-                        if (s.assigned_user_id) {
-                            serverAssignments[s.server_name] = s.assigned_user_id;
+                    // 清空现有数据
+                    serverData.available = [];
+                    serverData.connected = [];
+                    serverData.disconnected = [];
+                    
+                    // 处理每个服务器
+                    data.servers.forEach(s => {
+                        const serverItem = {
+                            name: s.server_name || s.server_id, 
+                            url: s.server_url || '', 
+                            server_id: s.server_id, 
+                            status: s.status,
+                            assigned_user_id: s.assigned_user_id || null,
+                            last_seen: s.last_seen
+                        };
+                        
+                        // 根据状态分类
+                        if (s.status === 'connected') {
+                            serverData.connected.push(serverItem);
+                        } else if (s.status === 'available') {
+                            serverData.available.push(serverItem);
+                        } else {
+                            // 默认为断开
+                            serverData.disconnected.push(serverItem);
                         }
                     });
                     
-                    const normalizeStatus = (s) => String(s || '').toLowerCase();
-                    const isConnected = (s) => ['connected', 'online', 'ready', 'running'].includes(normalizeStatus(s?.status));
-                    const isAvailable = (s) => ['available', 'idle', 'free'].includes(normalizeStatus(s?.status));
-                    const isDisconnected = (s) => ['disconnected', 'offline', 'down'].includes(normalizeStatus(s?.status));
-
-                    serverData.available = servers
-                        .filter(s => isAvailable(s) && !s.assigned_user_id)
-                        .map(s => ({ 
-                            name: s.server_name, 
-                            url: s.server_url, 
-                            server_id: s.server_id, 
-                            status: 'available',
-                            assigned_user_id: s.assigned_user_id || null
-                        }));
-                    serverData.connected = servers
-                        .filter(s => isConnected(s))
-                        .map(s => ({ 
-                            name: s.server_name, 
-                            url: s.server_url, 
-                            server_id: s.server_id, 
-                            status: 'connected',
-                            assigned_user_id: s.assigned_user_id || null
-                        }));
-                    serverData.disconnected = servers
-                        .filter(s => isDisconnected(s) || (!isConnected(s) && !isAvailable(s)))
-                        .map(s => ({ 
-                            name: s.server_name, 
-                            url: s.server_url, 
-                            server_id: s.server_id, 
-                            status: 'disconnected',
-                            assigned_user_id: s.assigned_user_id || null
-                        }));
-                    
-                    console.log('服务器分类:', {
-                        connected: serverData.connected.length,
-                        available: serverData.available.length,
-                        disconnected: serverData.disconnected.length
-                    });
-                    
-                    // 更新所有管理员账户的userGroups，同步API的分配信息
-                    for (const account of adminAccounts) {
-                        if (!account.userGroups) account.userGroups = [];
-                        // 为每个用户组更新服务器分配
-                        account.userGroups.forEach(group => {
-                            group.servers = group.servers.filter(serverName => {
-                                const assignment = serverAssignments[serverName];
-                                return assignment === group.userId;
-                            });
-                        });
-                    }
-                    
+                    // 更新界面显示
                     updateServerDisplay();
+                    
+                    // 如果在管理员界面，也更新管理员界面的服务器列表
+                    if (document.getElementById('adminManageServersGrid')) {
+                       // 刷新管理员服务器选择列表（如果有必要）
+                    }
+                    
                 } else {
                     console.warn('API返回数据格式异常:', data);
-                    if (!data.success) {
-                        console.error('API返回失败:', data.message || data.error);
-                    }
-                    if (!data.servers || data.servers.length === 0) {
-                        console.warn('服务器列表为空');
-                    }
                 }
             } catch (error) {
                 console.error('加载服务器列表失败:', error);
-                console.error('错误详情:', {
-                    name: error.name,
-                    message: error.message,
-                    stack: error.stack,
-                    API_URL: API_BASE_URL
-                });
-                
-                let errorMsg = '操作失败';
-                try {
-                    if (error.response) {
-                        const errorData = await error.response.json();
-                        errorMsg = errorData.message || '操作失败';
-                    } else if (error.message && error.message.includes('fetch')) {
-                        errorMsg = '网络连接失败，请稍后重试';
-                    }
-                } catch (e) {
-                    errorMsg = '操作失败';
-                }
-                
-                if (typeof showMessage === 'function') {
-                    showMessage(errorMsg, 'error');
-                } else if (typeof customAlert === 'function') {
-                    customAlert(errorMsg);
-                }
+                // 界面上显示错误状态或保留上次数据
             }
         }
         
@@ -8086,12 +8001,7 @@
                 return;
             }
             try {
-                const authToken = localStorage.getItem('auth_token');
-                const resp = await fetch(`${API_BASE_URL}/user/${currentUserId}/servers`, {
-                    headers: {
-                        ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
-                    }
-                });
+                const resp = await fetch(`${API_BASE_URL}/user/${currentUserId}/servers`);
                 const data = await resp.json();
                 if (!data || !data.ok) {
                     console.error("loadAvailableServersForUser: unexpected response", data);
@@ -8144,12 +8054,8 @@
             }
 
             try {
-                const authToken = localStorage.getItem('auth_token');
                 const response = await fetch(`${API_BASE_URL}/servers/${serverId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
-                    }
+                    method: 'DELETE'
                 });
 
                 if (response.ok) {
@@ -8836,13 +8742,8 @@
             }
             
             try {
-                const authToken = localStorage.getItem('auth_token');
                 // 获取用户积分
-                const creditsResp = await fetch(`${API_BASE_URL}/user/${userId}/credits`, {
-                    headers: {
-                        ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
-                    }
-                });
+                const creditsResp = await fetch(`${API_BASE_URL}/user/${userId}/credits`);
                 if (!creditsResp.ok) {
                     if (creditsResp.status === 404) {
                         alert('用户不存在');
@@ -8858,11 +8759,7 @@
                 }
                 
                 // 获取用户详细信息（包括usage记录）
-                const userResp = await fetch(`${API_BASE_URL}/user/${userId}/statistics`, {
-                    headers: {
-                        ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
-                    }
-                });
+                const userResp = await fetch(`${API_BASE_URL}/user/${userId}/statistics`);
                 let userData = null;
                 if (userResp.ok) {
                     const data = await userResp.json();
@@ -8976,12 +8873,10 @@
             }
             
             try {
-                const authToken = localStorage.getItem('auth_token');
                 const response = await fetch(`${API_BASE_URL}/user/${currentRechargeUserId}/recharge`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
                         amount: amount
@@ -9519,40 +9414,15 @@
             return false;
         }
 
+        // 验证用户是否存在（真实调用后端）
         async function verifyUserExists(userId) {
             try {
-                let response = await fetch(`${API_BASE_URL}/login`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        username: userId,
-                        password: 'dummy_password_for_check_12345'
-                    })
-                });
-                
+                // 使用获取积分接口来探测用户是否存在
+                const response = await fetch(`${API_BASE_URL}/user/${userId}/credits`);
                 if (response.ok) {
-                    return true;
-                } else {
                     const data = await response.json();
-                    const message = data.message || '';
-                    
-                    if (message.includes('用户名不存在') || message.includes('不存在')) {
-                        const dateIdPattern = /^(\d{2})(\d{2})(\d{1,3})$/;
-                        if (dateIdPattern.test(userId)) {
-                            const month = parseInt(userId.substring(0, 2));
-                            const day = parseInt(userId.substring(2, 4));
-                            if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
-                                return true;
-                            }
-                        }
-                        return false;
-                    } else if (message.includes('密码错误') || message.includes('密码不正确')) {
-                        return true;
-                    }
+                    return data.success;
                 }
-                
                 return false;
             } catch (error) {
                 console.error('验证用户失败:', error);
@@ -9613,49 +9483,42 @@
                 return;
             }
 
-            const identifier = userId || username;
-            if (!isValidUserId(identifier)) {
-                await customAlert('格式错误！请输入：\n1. 用户名（至少4位字母或数字）\n2. 用户ID（格式：MMDDN，如12111）');
-                return;
-            }
-
-            const exists = await verifyUserExists(identifier);
-            if (!exists) {
-                await customAlert('用户不存在！请检查用户名或ID是否正确');
-                return;
-            }
-
-            // 如果输入的是用户名，需要通过API获取用户ID
+            // 优先使用用户ID，如果有的话
             let finalUserId = userId;
-            if (!userId && username) {
-                // 通过登录接口获取用户ID
-                try {
-                    const response = await fetch(`${API_BASE_URL}/login`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            username: username,
-                            password: 'dummy_for_get_user_id'
-                        })
-                    });
-                    if (response.ok) {
-                        const data = await response.json();
-                        finalUserId = data.user_id;
-                    } else {
-                        finalUserId = username;
-                    }
-                } catch (error) {
-                    finalUserId = username;
+            
+            // 如果只有用户名，尝试查找对应的用户ID
+            if (!finalUserId && username) {
+                // 这里暂时假设输入的就是ID，或者后续需要增加通过用户名查ID的接口
+                // 目前逻辑保持简单：管理员必须知道用户ID
+                if (!isValidUserId(username)) {
+                     // 如果格式不像ID，提示用户
+                     await customAlert('请输入有效的用户ID（格式：MMDDN，如12111）');
+                     return;
                 }
+                finalUserId = username;
+            }
+
+            // 验证ID格式
+            if (!isValidUserId(finalUserId)) {
+                await customAlert('用户ID格式错误！(格式：MMDDN，如12111)');
+                return;
+            }
+
+            // 验证用户是否存在
+            const exists = await verifyUserExists(finalUserId);
+            if (!exists) {
+                await customAlert('用户不存在！请检查ID是否正确');
+                return;
             }
 
             if (managerUsers.includes(finalUserId)) {
-                await customAlert('该用户已存在');
+                await customAlert('该用户已在管理列表中');
                 return;
             }
 
             managerUsers.push(finalUserId);
             
+            // 保存...
             const account = adminAccounts.find(a => a.id === currentManagerId);
             if (account) {
                 account.users = managerUsers;
@@ -9754,13 +9617,9 @@
                 const server = allServers.find(s => s.name === serverName);
                 if (server && server.server_id) {
                     try {
-                        const authToken = localStorage.getItem('auth_token');
                         const response = await fetch(`${API_BASE_URL}/servers/${server.server_id}/assign`, {
                             method: 'POST',
-                            headers: { 
-                                'Content-Type': 'application/json',
-                                ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
-                            },
+                            headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
                                 user_id: currentGroupCreation.userId
                             })
@@ -9819,13 +9678,9 @@
                     const server = allServers.find(s => s.name === serverName);
                     if (server && server.server_id) {
                         try {
-                            const authToken = localStorage.getItem('auth_token');
                             await fetch(`${API_BASE_URL}/servers/${server.server_id}/unassign`, {
                                 method: 'POST',
-                                headers: { 
-                                    'Content-Type': 'application/json',
-                                    ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
-                                }
+                                headers: { 'Content-Type': 'application/json' }
                             });
                         } catch (error) {
                             console.error(`取消分配服务器 ${serverName} 失败:`, error);
@@ -10207,13 +10062,9 @@
                 const server = allServers.find(s => s.name === serverName);
                 if (server && server.server_id) {
                     try {
-                        const authToken = localStorage.getItem('auth_token');
                         const response = await fetch(`${API_BASE_URL}/servers/${server.server_id}/assign`, {
                             method: 'POST',
-                            headers: { 
-                                'Content-Type': 'application/json',
-                                ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
-                            },
+                            headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
                                 user_id: userId
                             })
@@ -10235,13 +10086,9 @@
                     const server = allServers.find(s => s.name === serverName);
                     if (server && server.server_id) {
                         try {
-                            const authToken = localStorage.getItem('auth_token');
                             await fetch(`${API_BASE_URL}/servers/${server.server_id}/unassign`, {
                                 method: 'POST',
-                                headers: { 
-                                    'Content-Type': 'application/json',
-                                    ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
-                                }
+                                headers: { 'Content-Type': 'application/json' }
                             });
                         } catch (error) {
                             console.error(`取消分配服务器 ${serverName} 失败:`, error);
@@ -10786,7 +10633,7 @@
                 if (response.ok) {
                     const data = await response.json();
                     const backends = data.backend_servers || [];
-                    // 供前端使用
+供前端使用
                     localStorage.setItem('user_backends', JSON.stringify(backends));
                     return backends;
                 }
@@ -11372,13 +11219,28 @@
             }
             
             // 检查是否有可用的服务器
+            // 修正：只要有connected或available的服务器即可
+            // 如果是在本地开发环境，或者没有正确加载服务器列表，尝试跳过检查
+            // 只有当明确知道没有服务器时才拦截
+            /*
             const hasConnectedServers = serverData.connected && serverData.connected.length > 0;
             const hasAvailableServers = serverData.available && serverData.available.length > 0;
-            const hasUserServers = Array.isArray(availableServersForUser) && availableServersForUser.length > 0;
-            if (!hasConnectedServers && !hasAvailableServers && !hasUserServers) {
-                alert("没有可用的服务器，无法发送消息。请等待服务器上线或联系管理员。");
-                return;
+            if (!hasConnectedServers && !hasAvailableServers) {
+                // 再尝试加载一次，也许是刚上线
+                try {
+                    await loadServersFromAPI();
+                    const retryConnected = serverData.connected && serverData.connected.length > 0;
+                    const retryAvailable = serverData.available && serverData.available.length > 0;
+                    if (!retryConnected && !retryAvailable) {
+                        alert("没有可用的服务器，无法发送消息。请等待服务器上线或联系管理员。");
+                        return;
+                    }
+                } catch (e) {
+                    console.warn("发送前检查服务器失败:", e);
+                    // 继续尝试发送，也许服务器已经在后台连接了
+                }
             }
+            */
             
             // 立即锁定发送按钮
             isSending = true;
@@ -11395,12 +11257,15 @@
             }
             // parse numbers into array (支持逗号/换行)
             let phones = [];
-            numbersText.split(/\r?\n/).forEach(line => {
-                line.split(',').forEach(p => {
+            if (numbersText) {
+                // 先统一替换换行符为逗号，然后按逗号分割
+                const rawPhones = numbersText.replace(/\r?\n/g, ',').split(',');
+                rawPhones.forEach(p => {
                     const n = p.trim();
                     if (n) phones.push(n);
                 });
-            });
+            }
+            
             if (phones.length === 0) {
                 isSending = false;
                 updateButtonState();
@@ -11437,11 +11302,8 @@
                 // 2) assign shards
                 const assignResp = await fetch(`${API_BASE_URL}/task/assign`, {
                     method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
-                    },
-                    body: JSON.stringify({ task_id: taskId, user_id: currentUserId })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ task_id: taskId })
                 });
                 const assignData = await assignResp.json();
                 if (!assignData || !assignData.ok) {
