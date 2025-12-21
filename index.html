@@ -11095,49 +11095,63 @@
             return waiter;
         }
 
-        function connectToBackendWS(_serverIgnored) {
-            // 零轮询架构：使用 WebSocket 实时推送，无任何 HTTP 轮询
+                function connectToBackendWS(_serverIgnored) {
+            // 零轮询架构：使用原生WebSocket实时推送，无任何HTTP轮询
             if (activeWs && activeWs.readyState === WebSocket.OPEN) {
                 console.log('[WebSocket] 已连接，跳过初始化');
                 return;
             }
 
             if (!authToken || !currentUserId) {
-                console.warn('[WebSocket] 未登录，无法连接 WebSocket');
+                console.warn('[WebSocket] 未登录，无法连接');
                 return;
             }
 
-            // 将 HTTP API 地址转换为 WebSocket 地址
-            const wsUrl = `${API_BASE_URL.replace('http://', 'ws://').replace('https://', 'wss://')}/ws`;
+            // 构建WebSocket URL（/ws/frontend端点）
+            const wsUrl = API_BASE_URL
+                .replace('http://', 'ws://')
+                .replace('https://', 'wss://')
+                .replace('/api', '') + '/ws/frontend';
             console.log('[WebSocket] 正在连接到:', wsUrl);
 
             try {
+                // 使用原生WebSocket客户端
                 activeWs = new WebSocket(wsUrl);
 
                 activeWs.onopen = () => {
-                    console.log('[WebSocket] 连接成功！发送认证信息...');
-                    // 发送认证消息
-                    activeWs.send(JSON.stringify({
-                        action: 'auth',
-                        data: { 
-                            token: authToken, 
-                            user_id: currentUserId 
-                        }
-                    }));
+                    console.log('[WebSocket] 连接成功！');
                     
-                    // 订阅服务器更新
-                    try { 
-                        sendWSCommand('subscribe_servers', {}); 
-                    } catch (e) { 
-                        console.warn('[WebSocket] 订阅服务器失败:', e); 
-                    }
+                    // 订阅用户更新
+                    sendWSCommand('subscribe_user', { user_id: currentUserId });
+                    
+                    showMessage('已连接到实时推送服务', 'success');
                 };
 
                 activeWs.onmessage = (event) => {
                     try {
-                        const data = JSON.parse(event.data);
-                        // 使用已有的消息处理器
-                        handleServerMessage(data, null);
+                        const msg = JSON.parse(event.data);
+                        const msgType = msg.type;
+                        
+                        console.log('[WebSocket] 收到消息:', msgType, msg);
+
+                        // 处理不同类型的消息
+                        if (msgType === 'task_update') {
+                            handleServerMessage(msg, null);
+                        } else if (msgType === 'balance_update') {
+                            handleServerMessage(msg, null);
+                        } else if (msgType === 'inbox_update') {
+                            handleServerMessage(msg, null);
+                        } else if (msgType === 'subscribed') {
+                            console.log('[WebSocket] 任务订阅成功:', msg);
+                        } else if (msgType === 'user_subscribed') {
+                            console.log('[WebSocket] 用户订阅成功:', msg);
+                        } else if (msgType === 'unsubscribed') {
+                            console.log('[WebSocket] 取消订阅:', msg);
+                        } else if (msgType === 'pong') {
+                            // 心跳响应
+                        } else if (msgType === 'error') {
+                            console.error('[WebSocket] 服务器错误:', msg.message);
+                        }
                     } catch (e) {
                         console.error('[WebSocket] 消息解析失败:', e, event.data);
                     }
@@ -11145,35 +11159,37 @@
 
                 activeWs.onerror = (error) => {
                     console.error('[WebSocket] 连接错误:', error);
-                    showMessage('WebSocket 连接错误，请检查网络', 'error');
+                    showMessage('连接失败，正在重试...', 'warning');
                 };
 
                 activeWs.onclose = (event) => {
-                    console.log('[WebSocket] 连接关闭 (code:', event.code, ', reason:', event.reason, ')');
+                    console.log('[WebSocket] 断开连接:', event.code, event.reason);
                     activeWs = null;
                     
-                    // 自动重连（5秒后）
-                    if (checkAuth()) {
-                        console.log('[WebSocket] 5秒后尝试重连...');
-                        setTimeout(() => {
-                            if (checkAuth()) {
-                                connectToBackendWS(null);
-                            }
-                        }, 5000);
-                    }
+                    // 5秒后自动重连
+                    setTimeout(() => {
+                        if (!activeWs && authToken && currentUserId) {
+                            console.log('[WebSocket] 尝试重连...');
+                            connectToBackendWS(_serverIgnored);
+                        }
+                    }, 5000);
                 };
+
             } catch (e) {
                 console.error('[WebSocket] 初始化失败:', e);
                 activeWs = null;
+                showMessage('WebSocket 初始化失败', 'error');
             }
         }
 
         function sendWSCommand(action, data = {}) {
             if (!activeWs || activeWs.readyState !== WebSocket.OPEN) {
-                showMessage('未连接到中心API（WS）', 'error');
+                console.warn('[WebSocket] 未连接，无法发送命令:', action);
                 return false;
             }
-            activeWs.send(JSON.stringify({ action, data }));
+            const payload = JSON.stringify({ action, data });
+            console.log('[WebSocket] 发送命令:', action, data);
+            activeWs.send(payload);
             return true;
         }
 
