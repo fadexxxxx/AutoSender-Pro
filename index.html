@@ -2968,7 +2968,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 100000;
+            z-index: 200000;
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
@@ -2980,6 +2980,11 @@
             opacity: 1;
             visibility: visible;
             pointer-events: auto;
+        }
+
+        /* 通用提示弹窗需要更高的z-index，确保在其他弹窗之上 */
+        #customModal {
+            z-index: 300000;
         }
 
         @keyframes fadeIn {
@@ -3616,24 +3621,28 @@
         .server-buttons-grid-new > button.active,
         .server-buttons-grid-new button.active {
             opacity: 1;
-            background: linear-gradient(135deg, #00ff88 0%, #0080ff 50%, #be7dff 100%);
-            box-shadow: 0 0 40px rgba(0, 255, 136, 0.6), 0 0 60px rgba(0, 128, 255, 0.4);
+            background: radial-gradient(circle at 30% 30%, #ff4dff 0%, #f700ff 40%, #cc00cc 100%);
+            box-shadow: 0 0 45px rgba(247, 0, 255, 0.7), 
+                        0 0 65px rgba(247, 0, 255, 0.5),
+                        inset 0 2px 15px rgba(255, 255, 255, 0.4);
             transform: scale(1.1) rotateY(0deg);
             filter: none;
+            animation: pulsePurple 1.8s ease-in-out infinite, rotate3D 4s ease-in-out infinite;
         }
 
         .server-buttons-grid-new > button.active::before,
         .server-buttons-grid-new button.active::before {
             opacity: 0.9;
-            background: repeating-conic-gradient(from 0deg, rgba(0, 255, 136, 0.9) 0deg 30deg, rgba(0, 128, 255, 0.9) 60deg 90deg, transparent 120deg),
-                        repeating-conic-gradient(from 45deg, rgba(190, 125, 255, 0.9) 0deg 20deg, rgba(0, 255, 136, 0.9) 40deg 60deg, transparent 90deg);
-            animation: rotate 6s linear infinite;
+            background: repeating-conic-gradient(from 0deg, rgba(247, 0, 255, 0.9) 0deg 30deg, rgba(255, 77, 255, 0.9) 60deg 90deg, transparent 120deg),
+                        repeating-conic-gradient(from 45deg, rgba(204, 0, 204, 0.9) 0deg 20deg, rgba(247, 0, 255, 0.9) 40deg 60deg, transparent 90deg);
+            animation: rotate 5s linear infinite, glowPurple 1.8s ease-in-out infinite;
         }
 
         .server-buttons-grid-new > button.active::after,
         .server-buttons-grid-new button.active::after {
-            background: linear-gradient(135deg, #0f0, #00f, #0ff);
-            opacity: 0.3;
+            background: radial-gradient(circle at 50% 50%, rgba(247, 0, 255, 0.6), rgba(255, 77, 255, 0.4), rgba(204, 0, 204, 0.3));
+            opacity: 0.4;
+            animation: rotate 8s linear infinite reverse, pulsePurpleGlow 1.8s ease-in-out infinite;
         }
 
         .server-buttons-grid-new > button:hover,
@@ -3647,28 +3656,63 @@
             transform: scale(0.95) rotateY(-15deg);
         }
 
+        .server-buttons-grid-new > button.connected,
+        .server-buttons-grid-new button.connected {
+            background: radial-gradient(circle at 30% 30%, #b4ff4a 0%, #89fc23 40%, #6fd100 100%);
+            box-shadow: 0 4px 20px rgba(137, 252, 35, 0.6), 
+                        0 0 30px rgba(137, 252, 35, 0.4),
+                        inset 0 2px 10px rgba(255, 255, 255, 0.3);
+            opacity: 1;
+            filter: none;
+            animation: pulseGreen 2s ease-in-out infinite;
+        }
+
+        .server-buttons-grid-new > button.connected::before {
+            background: repeating-conic-gradient(from 0deg, rgba(137, 252, 35, 0.9) 0deg 30deg, rgba(180, 255, 74, 0.9) 60deg 90deg, transparent 120deg),
+                        repeating-conic-gradient(from 45deg, rgba(111, 209, 0, 0.9) 0deg 20deg, rgba(137, 252, 35, 0.9) 40deg 60deg, transparent 90deg);
+            animation: rotate 6s linear infinite, glowGreen 2s ease-in-out infinite;
+        }
+
+        .server-buttons-grid-new > button.disconnected,
+        .server-buttons-grid-new button.disconnected {
+            background: radial-gradient(circle at 30% 30%, #ff4d4d 0%, #f70707 40%, #cc0000 100%);
+            box-shadow: 0 4px 20px rgba(247, 7, 7, 0.5), 
+                        0 0 30px rgba(247, 7, 7, 0.3),
+                        inset 0 2px 10px rgba(255, 255, 255, 0.2);
+            animation: pulseRed 2.5s ease-in-out infinite;
+        }
+
+        .server-buttons-grid-new > button.disconnected::before {
+            background: repeating-conic-gradient(from 0deg, rgba(247, 7, 7, 0.8) 0deg 30deg, rgba(255, 77, 77, 0.8) 60deg 90deg, transparent 120deg),
+                        repeating-conic-gradient(from 45deg, rgba(204, 0, 0, 0.8) 0deg 20deg, rgba(247, 7, 7, 0.8) 40deg 60deg, transparent 90deg);
+            animation: rotate 8s linear infinite, glowRed 2.5s ease-in-out infinite;
+        }
+
         .server-buttons-grid-new > button.selected,
         .server-buttons-grid-new button.selected {
             opacity: 1;
-            background: radial-gradient(circle at top left, #0f0 0%, transparent 50%),
-                        radial-gradient(circle at bottom right, #0f0 0%, transparent 60%);
-            box-shadow: 0 0 50px #0f0;
+            background: radial-gradient(circle at 30% 30%, #ff4dff 0%, #f700ff 40%, #cc00cc 100%);
+            box-shadow: 0 0 45px rgba(247, 0, 255, 0.7), 
+                        0 0 65px rgba(247, 0, 255, 0.5),
+                        inset 0 2px 15px rgba(255, 255, 255, 0.4);
             transform: scale(1.08);
-            filter: blur(0.5px);
+            filter: none;
+            animation: pulsePurple 1.8s ease-in-out infinite, rotate3D 4s ease-in-out infinite;
         }
 
         .server-buttons-grid-new > button.selected::before,
         .server-buttons-grid-new button.selected::before {
             opacity: 0.9;
-            background: repeating-conic-gradient(from 0deg, #0f0 0deg 30deg, #0ff 60deg 90deg, transparent 120deg),
-                        repeating-conic-gradient(from 45deg, #0f0 0deg 20deg, #0ff 40deg 60deg, transparent 90deg);
-            animation-play-state: running;
+            background: repeating-conic-gradient(from 0deg, rgba(247, 0, 255, 0.9) 0deg 30deg, rgba(255, 77, 255, 0.9) 60deg 90deg, transparent 120deg),
+                        repeating-conic-gradient(from 45deg, rgba(204, 0, 204, 0.9) 0deg 20deg, rgba(247, 0, 255, 0.9) 40deg 60deg, transparent 90deg);
+            animation: rotate 5s linear infinite, glowPurple 1.8s ease-in-out infinite;
         }
 
         .server-buttons-grid-new > button.selected::after,
         .server-buttons-grid-new button.selected::after {
-            background: linear-gradient(135deg, #0f0, #00f, #0ff);
-            opacity: 0.3;
+            background: radial-gradient(circle at 50% 50%, rgba(247, 0, 255, 0.6), rgba(255, 77, 255, 0.4), rgba(204, 0, 204, 0.3));
+            opacity: 0.4;
+            animation: rotate 8s linear infinite reverse, pulsePurpleGlow 1.8s ease-in-out infinite;
         }
 
         .user-detail-panel {
@@ -4010,6 +4054,484 @@
             transform: translateY(-2px);
         }
 
+        /* ID库按钮 - 青色渐变 */
+        .admin-back-btn.btn-id-library {
+            background: linear-gradient(135deg, #00d4aa 0%, #00b894 50%, #00a085 100%);
+            color: white;
+        }
+        .admin-back-btn.btn-id-library:hover {
+            background: linear-gradient(135deg, #00f5c4 0%, #00d4aa 50%, #00b894 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 212, 170, 0.4);
+        }
+
+        /* 充值按钮 - 金色渐变 */
+        .admin-back-btn.btn-recharge {
+            background: linear-gradient(135deg, #ffd700 0%, #ffb347 50%, #ff9500 100%);
+            color: #2f2f2f;
+        }
+        .admin-back-btn.btn-recharge:hover {
+            background: linear-gradient(135deg, #ffe44d 0%, #ffc966 50%, #ffb347 100%);
+            color: #2f2f2f;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+        }
+
+        /* 修改密码按钮 - 紫色渐变 */
+        .admin-back-btn.btn-password {
+            background: linear-gradient(135deg, #a855f7 0%, #8b5cf6 50%, #7c3aed 100%);
+            color: white;
+        }
+        .admin-back-btn.btn-password:hover {
+            background: linear-gradient(135deg, #c084fc 0%, #a855f7 50%, #8b5cf6 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+        }
+
+        /* 保存退出按钮 - 珊瑚红渐变 */
+        .admin-back-btn.btn-exit {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 50%, #e74c3c 100%);
+            color: white;
+        }
+        .admin-back-btn.btn-exit:hover {
+            background: linear-gradient(135deg, #ff8787 0%, #ff6b6b 50%, #ee5a52 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+        }
+        /*#endregion */
+
+        /*#region ID库面板样式 */
+        .id-library-panel {
+            width: 75%;
+            max-width: 900px;
+            height: 80vh;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(145deg, #f0f9ff 0%, #e0f2fe 50%, #f0fdf4 100%);
+        }
+
+        .id-library-header {
+            background: linear-gradient(135deg, #00d4aa 0%, #00b894 50%, #00a085 100%);
+            padding: 18px 25px;
+        }
+
+        .id-library-header .custom-modal-title {
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .id-library-header .custom-modal-close {
+            color: white;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .id-library-header .custom-modal-close:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .id-library-content {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .id-library-toolbar {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+            padding: 18px 20px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(240, 253, 244, 0.85) 100%);
+            border-radius: 16px;
+            border: 2px solid var(--border-dark);
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .id-library-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .id-library-input-group label {
+            font-size: 12px;
+            font-weight: bold;
+            color: var(--text-dark);
+            letter-spacing: 1px;
+        }
+
+        .id-library-input {
+            padding: 10px 14px;
+            border: 2px solid var(--border-dark);
+            border-radius: 10px;
+            font-size: 14px;
+            background: white;
+            transition: all 0.3s ease;
+            width: 220px;
+        }
+
+        .id-library-input:focus {
+            outline: none;
+            border-color: #00d4aa;
+            box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.15);
+        }
+
+        .password-input-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .password-input-wrapper .id-library-input {
+            padding-right: 40px;
+        }
+
+        .password-toggle-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            opacity: 0.6;
+            transition: opacity 0.3s ease;
+        }
+
+        .password-toggle-btn:hover {
+            opacity: 1;
+        }
+
+        .id-library-btn {
+            padding: 10px 18px;
+            border: 2px solid var(--border-dark);
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .id-library-btn.btn-save {
+            background: linear-gradient(135deg, #00d4aa 0%, #00b894 100%);
+            color: white;
+        }
+
+        .id-library-btn.btn-save:hover {
+            background: linear-gradient(135deg, #00f5c4 0%, #00d4aa 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 212, 170, 0.4);
+        }
+
+        .id-library-btn.btn-import {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .id-library-btn.btn-import:hover {
+            background: linear-gradient(135deg, #7c8ff7 0%, #8b5cb5 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .id-library-btn.btn-clear {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+        }
+
+        .id-library-btn.btn-clear:hover {
+            background: linear-gradient(135deg, #ff8787 0%, #ff6b6b 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .id-library-list-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+            border-radius: 16px;
+            border: 2px solid var(--border-dark);
+            overflow: hidden;
+        }
+
+        .id-library-list-header {
+            display: flex;
+            padding: 14px 20px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-bottom: 2px solid var(--border-dark);
+            font-weight: bold;
+            font-size: 13px;
+            color: var(--text-dark);
+        }
+
+        .header-col {
+            display: flex;
+            align-items: center;
+        }
+
+        .header-col.col-index {
+            width: 50px;
+            justify-content: center;
+        }
+
+        .header-col.col-account {
+            flex: 2;
+            min-width: 200px;
+        }
+
+        .header-col.col-password {
+            flex: 1.5;
+            min-width: 150px;
+        }
+
+        .header-col.col-status {
+            width: 80px;
+            justify-content: center;
+        }
+
+        .header-col.col-usage-status {
+            width: 100px;
+            justify-content: center;
+        }
+
+        .header-col.col-actions {
+            width: 120px;
+            justify-content: center;
+        }
+
+        .id-library-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .id-library-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 10px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, rgba(240, 253, 244, 0.8) 0%, rgba(224, 242, 254, 0.6) 100%);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .id-library-item:hover {
+            background: linear-gradient(135deg, rgba(220, 252, 231, 0.9) 0%, rgba(186, 230, 253, 0.7) 100%);
+            transform: translateX(3px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .id-library-item.error {
+            background: linear-gradient(135deg, rgba(254, 226, 226, 0.8) 0%, rgba(254, 215, 215, 0.6) 100%);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .item-col {
+            display: flex;
+            align-items: center;
+        }
+
+        .item-col.col-index {
+            width: 50px;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            color: #64748b;
+            background: rgba(255, 255, 255, 0.6);
+            padding: 6px 10px;
+            border-radius: 8px;
+        }
+
+        .item-col.col-account {
+            flex: 2;
+            min-width: 200px;
+            font-size: 14px;
+            color: var(--text-dark);
+            font-weight: 500;
+            word-break: break-all;
+        }
+
+        .item-col.col-password {
+            flex: 1.5;
+            min-width: 150px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .item-col.col-status {
+            width: 80px;
+            justify-content: center;
+        }
+
+        .item-col.col-usage-status {
+            width: 100px;
+            justify-content: center;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .status-badge.normal {
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+            color: #15803d;
+            border: 1px solid #86efac;
+        }
+
+        .status-badge.error {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: #dc2626;
+            border: 1px solid #fca5a5;
+        }
+
+        .usage-status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .usage-status-badge.new {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            color: #1d4ed8;
+            border: 1px solid #93c5fd;
+        }
+
+        .usage-status-badge.new:hover {
+            background: linear-gradient(135deg, #bfdbfe 0%, #93c5fd 100%);
+            transform: scale(1.05);
+        }
+
+        .usage-status-badge.used {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #92400e;
+            border: 1px solid #fcd34d;
+        }
+
+        .usage-status-badge.used:hover {
+            background: linear-gradient(135deg, #fde68a 0%, #fcd34d 100%);
+            transform: scale(1.05);
+        }
+
+        .item-col.col-actions {
+            width: 120px;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .item-action-btn {
+            padding: 6px 12px;
+            border: 1px solid var(--border-dark);
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .item-action-btn.btn-fill {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            color: #1d4ed8;
+        }
+
+        .item-action-btn.btn-fill:hover {
+            background: linear-gradient(135deg, #93c5fd 0%, #60a5fa 100%);
+            color: white;
+        }
+
+        .item-action-btn.btn-delete {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: #dc2626;
+        }
+
+        .item-action-btn.btn-delete:hover {
+            background: linear-gradient(135deg, #fca5a5 0%, #f87171 100%);
+            color: white;
+        }
+
+        .id-library-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            color: #94a3b8;
+        }
+
+        .id-library-empty .empty-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .id-library-empty .empty-text {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .id-library-empty .empty-hint {
+            font-size: 13px;
+            opacity: 0.7;
+        }
+
+        .id-library-footer {
+            padding: 15px 20px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(240, 253, 244, 0.85) 100%);
+            border-radius: 12px;
+            border: 2px solid var(--border-dark);
+            margin-top: 15px;
+        }
+
+        .id-library-stats {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+        }
+
+        .id-library-stats .stat-item {
+            font-size: 14px;
+            color: var(--text-dark);
+        }
+
+        .id-library-stats .stat-item strong {
+            font-size: 16px;
+            margin-left: 5px;
+        }
+
+        /* ID库面板滚动条样式 */
+        .id-library-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .id-library-list::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 4px;
+        }
+
+        .id-library-list::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #00d4aa 0%, #00b894 100%);
+            border-radius: 4px;
+        }
+
+        .id-library-list::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #00f5c4 0%, #00d4aa 100%);
+        }
+
         .server-manager-section {
             background: linear-gradient(135deg, #ffd6e7 0%, #c1f0ff 50%, #c5ffc1 100%);
             border-radius: 18px;
@@ -4189,30 +4711,78 @@
         .server-buttons-grid > button.active,
         .server-buttons-grid .server-button.active {
             opacity: 1;
-            background: linear-gradient(135deg, #00ff88 0%, #0080ff 50%, #be7dff 100%);
-            box-shadow: 0 0 40px rgba(0, 255, 136, 0.6), 0 0 60px rgba(0, 128, 255, 0.4);
+            background: radial-gradient(circle at 30% 30%, #ff4dff 0%, #f700ff 40%, #cc00cc 100%);
+            box-shadow: 0 0 45px rgba(247, 0, 255, 0.7), 
+                        0 0 65px rgba(247, 0, 255, 0.5),
+                        inset 0 2px 15px rgba(255, 255, 255, 0.4);
             transform: scale(1.1) rotateY(0deg);
             filter: none;
+            animation: pulsePurple 1.8s ease-in-out infinite, rotate3D 4s ease-in-out infinite;
         }
 
         .server-buttons-grid > button.active::before,
         .server-buttons-grid .server-button.active::before {
             opacity: 0.9;
-            background:
-                linear-gradient(135deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.08) 35%, transparent 60%),
-                repeating-linear-gradient(
-                    180deg,
-                    rgba(0,0,0,0.18) 0px,
-                    rgba(0,0,0,0.18) 2px,
-                    transparent 2px,
-                    transparent 7px
-                );
+            background: repeating-conic-gradient(from 0deg, rgba(247, 0, 255, 0.9) 0deg 30deg, rgba(255, 77, 255, 0.9) 60deg 90deg, transparent 120deg),
+                        repeating-conic-gradient(from 45deg, rgba(204, 0, 204, 0.9) 0deg 20deg, rgba(247, 0, 255, 0.9) 40deg 60deg, transparent 90deg);
+            animation: rotate 5s linear infinite, glowPurple 1.8s ease-in-out infinite;
         }
 
         .server-buttons-grid > button.active::after,
         .server-buttons-grid .server-button.active::after {
-            background: linear-gradient(135deg, #0f0, #00f, #0ff);
-            opacity: 0.3;
+            background: radial-gradient(circle at 50% 50%, rgba(247, 0, 255, 0.6), rgba(255, 77, 255, 0.4), rgba(204, 0, 204, 0.3));
+            opacity: 0.4;
+            animation: rotate 8s linear infinite reverse, pulsePurpleGlow 1.8s ease-in-out infinite;
+        }
+
+        @keyframes pulsePurple {
+            0%, 100% {
+                box-shadow: 0 0 45px rgba(247, 0, 255, 0.7), 
+                            0 0 65px rgba(247, 0, 255, 0.5),
+                            inset 0 2px 15px rgba(255, 255, 255, 0.4);
+                transform: scale(1.1) rotateY(0deg);
+            }
+            50% {
+                box-shadow: 0 0 55px rgba(247, 0, 255, 0.9), 
+                            0 0 75px rgba(247, 0, 255, 0.7),
+                            inset 0 2px 15px rgba(255, 255, 255, 0.5);
+                transform: scale(1.12) rotateY(5deg);
+            }
+        }
+
+        @keyframes glowPurple {
+            0%, 100% {
+                opacity: 0.8;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulsePurpleGlow {
+            0%, 100% {
+                opacity: 0.4;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.6;
+                transform: scale(1.1);
+            }
+        }
+
+        @keyframes rotate3D {
+            0%, 100% {
+                transform: scale(1.1) rotateY(0deg) rotateX(0deg);
+            }
+            25% {
+                transform: scale(1.12) rotateY(5deg) rotateX(2deg);
+            }
+            50% {
+                transform: scale(1.1) rotateY(0deg) rotateX(0deg);
+            }
+            75% {
+                transform: scale(1.12) rotateY(-5deg) rotateX(-2deg);
+            }
         }
 
         .server-buttons-grid > button:hover,
@@ -4286,23 +4856,80 @@
 
         .server-buttons-grid > button.connected,
         .server-buttons-grid .server-button.connected {
-            background: linear-gradient(135deg, #00ff88 0%, #4caf50 50%, #66bb6a 100%);
-            box-shadow: 0 4px 15px rgba(0, 255, 136, 0.5), 0 0 25px rgba(76, 175, 80, 0.4);
+            background: radial-gradient(circle at 30% 30%, #b4ff4a 0%, #89fc23 40%, #6fd100 100%);
+            box-shadow: 0 4px 20px rgba(137, 252, 35, 0.6), 
+                        0 0 30px rgba(137, 252, 35, 0.4),
+                        inset 0 2px 10px rgba(255, 255, 255, 0.3);
             opacity: 1;
             filter: none;
+            animation: pulseGreen 2s ease-in-out infinite;
         }
 
         .server-buttons-grid > button.connected::before {
-            background: repeating-conic-gradient(from 0deg, rgba(0, 255, 136, 0.8) 0deg 30deg, rgba(76, 175, 80, 0.8) 60deg 90deg, transparent 120deg),
-                        repeating-conic-gradient(from 45deg, rgba(102, 187, 106, 0.8) 0deg 20deg, rgba(0, 255, 136, 0.8) 40deg 60deg, transparent 90deg);
-            animation: rotate 8s linear infinite;
+            background: repeating-conic-gradient(from 0deg, rgba(137, 252, 35, 0.9) 0deg 30deg, rgba(180, 255, 74, 0.9) 60deg 90deg, transparent 120deg),
+                        repeating-conic-gradient(from 45deg, rgba(111, 209, 0, 0.9) 0deg 20deg, rgba(137, 252, 35, 0.9) 40deg 60deg, transparent 90deg);
+            animation: rotate 6s linear infinite, glowGreen 2s ease-in-out infinite;
+        }
+
+        @keyframes pulseGreen {
+            0%, 100% {
+                box-shadow: 0 4px 20px rgba(137, 252, 35, 0.6), 
+                            0 0 30px rgba(137, 252, 35, 0.4),
+                            inset 0 2px 10px rgba(255, 255, 255, 0.3);
+            }
+            50% {
+                box-shadow: 0 4px 25px rgba(137, 252, 35, 0.8), 
+                            0 0 40px rgba(137, 252, 35, 0.6),
+                            inset 0 2px 10px rgba(255, 255, 255, 0.4);
+            }
+        }
+
+        @keyframes glowGreen {
+            0%, 100% {
+                opacity: 0.6;
+            }
+            50% {
+                opacity: 0.9;
+            }
         }
 
         .server-buttons-grid > button.disconnected,
         .server-buttons-grid .server-button.disconnected {
-            background: linear-gradient(135deg, #ffcdd2 0%, #ffab91 100%);
+            background: radial-gradient(circle at 30% 30%, #ff4d4d 0%, #f70707 40%, #cc0000 100%);
+            box-shadow: 0 4px 20px rgba(247, 7, 7, 0.5), 
+                        0 0 30px rgba(247, 7, 7, 0.3),
+                        inset 0 2px 10px rgba(255, 255, 255, 0.2);
             position: relative;
             padding-right: 80px;
+            animation: pulseRed 2.5s ease-in-out infinite;
+        }
+
+        .server-buttons-grid > button.disconnected::before {
+            background: repeating-conic-gradient(from 0deg, rgba(247, 7, 7, 0.8) 0deg 30deg, rgba(255, 77, 77, 0.8) 60deg 90deg, transparent 120deg),
+                        repeating-conic-gradient(from 45deg, rgba(204, 0, 0, 0.8) 0deg 20deg, rgba(247, 7, 7, 0.8) 40deg 60deg, transparent 90deg);
+            animation: rotate 8s linear infinite, glowRed 2.5s ease-in-out infinite;
+        }
+
+        @keyframes pulseRed {
+            0%, 100% {
+                box-shadow: 0 4px 20px rgba(247, 7, 7, 0.5), 
+                            0 0 30px rgba(247, 7, 7, 0.3),
+                            inset 0 2px 10px rgba(255, 255, 255, 0.2);
+            }
+            50% {
+                box-shadow: 0 4px 25px rgba(247, 7, 7, 0.7), 
+                            0 0 35px rgba(247, 7, 7, 0.5),
+                            inset 0 2px 10px rgba(255, 255, 255, 0.3);
+            }
+        }
+
+        @keyframes glowRed {
+            0%, 100% {
+                opacity: 0.5;
+            }
+            50% {
+                opacity: 0.8;
+            }
         }
 
         .server-buttons-grid > button.disconnected .server-action-btn,
@@ -6232,6 +6859,65 @@
         </div>
     </div>
     <!--#endregion -->
+    <!--#region ID库面板 HTML -->
+    <div class="custom-modal-overlay" id="idLibraryModal" style="display: none;">
+        <div class="custom-modal-panel id-library-panel">
+            <div class="custom-modal-header id-library-header">
+                <span class="custom-modal-title">📋 ID库 - 账号管理</span>
+                <button class="custom-modal-close" onclick="closeIdLibraryModal()">×</button>
+            </div>
+            <div class="custom-modal-content id-library-content">
+                <!-- 顶部操作栏 -->
+                <div class="id-library-toolbar">
+                    <div class="id-library-input-group">
+                        <label>APPLE ID</label>
+                        <input type="text" class="id-library-input" id="idLibraryAppleId" placeholder="输入Apple ID邮箱">
+                    </div>
+                    <div class="id-library-input-group">
+                        <label>PASSWORD</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" class="id-library-input" id="idLibraryPassword" placeholder="输入密码">
+                            <button class="password-toggle-btn" onclick="toggleIdLibraryPassword()">👁</button>
+                        </div>
+                    </div>
+                    <button class="id-library-btn btn-save" onclick="saveIdLibraryAccount()">💾 保存</button>
+                    <button class="id-library-btn btn-import" onclick="importIdLibraryAccounts()">📂 导入</button>
+                    <button class="id-library-btn btn-clear" onclick="clearAllIdLibraryAccounts()">🗑️ 清空</button>
+                </div>
+
+                <!-- 账号列表区域 -->
+                <div class="id-library-list-container">
+                    <div class="id-library-list-header">
+                        <span class="header-col col-index">#</span>
+                        <span class="header-col col-account">账号</span>
+                        <span class="header-col col-password">密码</span>
+                        <span class="header-col col-status">状态</span>
+                        <span class="header-col col-usage-status">使用状态</span>
+                        <span class="header-col col-actions">操作</span>
+                    </div>
+                    <div class="id-library-list" id="idLibraryList">
+                        <!-- 账号列表项将通过JavaScript动态添加 -->
+                        <div class="id-library-empty">
+                            <div class="empty-icon">📭</div>
+                            <div class="empty-text">暂无账号</div>
+                            <div class="empty-hint">点击"保存"添加账号，或"导入"批量导入</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 底部统计栏 -->
+                <div class="id-library-footer">
+                    <div class="id-library-stats">
+                        <span class="stat-item">总数: <strong id="idLibraryTotal">0</strong></span>
+                        <span class="stat-item">正常: <strong id="idLibraryNormal" style="color: #00d4aa;">0</strong></span>
+                        <span class="stat-item">异常: <strong id="idLibraryError" style="color: #ff6b6b;">0</strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--#endregion -->
+
     <!--#region 积分充值面板 HTML -->
 
     <div class="custom-modal-overlay" id="rechargeModal" style="display: none;">
@@ -6241,18 +6927,18 @@
                 <button class="custom-modal-close" onclick="closeRechargeModal()">×</button>
             </div>
             <div class="custom-modal-content" style="padding: 20px; display: flex; flex-direction: column; height: calc(85vh - 100px);">
-                <!-- 第一行：用户ID输入、验证按钮、充值输入、确定按钮 -->
-                <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px; flex-wrap: wrap;">
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <label style="font-weight: bold; white-space: nowrap; font-size: 14px;">用户ID:</label>
-                        <input type="text" class="custom-modal-input" id="rechargeUserIdInput" placeholder="请输入用户ID(4位)或用户名" style="width: 220px;">
-                        <button class="custom-modal-btn" onclick="verifyRechargeUser()" style="white-space: nowrap; padding: 8px 15px;">验证</button>
+                <!-- 第一行：用户名输入、验证按钮、充值输入、确定按钮 -->
+                <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 15px; flex-wrap: wrap; height: 40px;">
+                    <div style="display: flex; align-items: center; gap: 8px; height: 36px;">
+                        <label style="font-weight: bold; white-space: nowrap; font-size: 14px; line-height: 36px;">用户名:</label>
+                        <input type="text" class="custom-modal-input" id="rechargeUserIdInput" placeholder="输入用户注册的用户名" style="width: 200px; height: 36px; box-sizing: border-box;">
+                        <button class="custom-modal-btn" onclick="verifyRechargeUser()" style="white-space: nowrap; padding: 0 15px; height: 36px; line-height: 36px;">验证</button>
                     </div>
-                    <div style="width: 20px;"></div>
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <label style="font-weight: bold; white-space: nowrap; font-size: 14px;">充值:</label>
-                        <input type="number" class="custom-modal-input" id="rechargeAmountInput" placeholder="充值金额" style="width: 120px;" min="0.01" step="0.01">
-                        <button class="custom-modal-btn confirm" onclick="confirmRecharge()" style="white-space: nowrap; padding: 8px 15px;">确定</button>
+                    <div style="width: 1px; height: 24px; background: #ddd;"></div>
+                    <div style="display: flex; align-items: center; gap: 8px; height: 36px;">
+                        <label style="font-weight: bold; white-space: nowrap; font-size: 14px; line-height: 36px;">充值:</label>
+                        <input type="number" class="custom-modal-input" id="rechargeAmountInput" placeholder="金额" style="width: 100px; height: 36px; box-sizing: border-box;" min="0.01" step="0.01">
+                        <button class="custom-modal-btn confirm" onclick="confirmRecharge()" style="white-space: nowrap; padding: 0 15px; height: 36px; line-height: 36px;">确定</button>
                     </div>
                 </div>
 
@@ -6328,9 +7014,10 @@
             <div class="server-manager-header">
                 <h1>🔧 Server Manager</h1>
                 <div style="display: flex; gap: 10px; align-items: center;">
-                    <button class="admin-back-btn" onclick="showRechargeModal()">💰 充值</button>
-                    <button class="admin-back-btn password-setting-btn" onclick="showPasswordChangeModal()">修改管理密码</button>
-                    <button class="admin-back-btn" onclick="backToLogin()">保存退出</button>
+                    <button class="admin-back-btn btn-id-library" onclick="showIdLibraryModal()">📋 ID库</button>
+                    <button class="admin-back-btn btn-recharge" onclick="showRechargeModal()">💰 充值</button>
+                    <button class="admin-back-btn btn-password" onclick="showPasswordChangeModal()">修改管理密码</button>
+                    <button class="admin-back-btn btn-exit" onclick="backToLogin()">保存退出</button>
                 </div>
             </div>
 
@@ -6671,6 +7358,13 @@
     <input type="file" id="messageFile" class="file-input" accept=".txt">
     <!--#endregion -->
     <script>
+        //#region 全局变量声明
+        let currentUserId = null;
+        let authToken = null;
+        let activeWs = null;
+        let activeWsServer = null;
+        //#endregion
+
         //#region 登录认证模块（用户登录、管理员登录、注册）
         function switchToUser() {
             const loginPanel = document.getElementById('loginPanel');
@@ -6779,7 +7473,7 @@
                 if (typeof showMessage === 'function') {
                     showMessage('请输入用户名和密码', 'error');
                 } else {
-                    alert('请输入用户名和密码');
+                    await customAlert('请输入用户名和密码');
                 }
                 return;
             }
@@ -6845,7 +7539,7 @@
                     if (typeof showMessage === 'function') {
                         showMessage(errorMsg, 'error');
                     } else {
-                        alert(errorMsg);
+                        await customAlert(errorMsg);
                     }
                 }
             } catch (error) {
@@ -6864,7 +7558,7 @@
                 if (typeof showMessage === 'function') {
                     showMessage(errorMsg, 'error');
                 } else {
-                    alert(errorMsg);
+                    await customAlert(errorMsg);
                 }
             }
         }
@@ -6924,7 +7618,7 @@
                             if (typeof showMessage === 'function') {
                                 showMessage(errorMsg, 'error');
                             } else {
-                                alert(errorMsg);
+                                await customAlert(errorMsg);
                             }
                         }
                     } catch (error) {
@@ -6943,7 +7637,7 @@
                         if (typeof showMessage === 'function') {
                             showMessage(errorMsg, 'error');
                         } else {
-                            alert(errorMsg);
+                            await customAlert(errorMsg);
                         }
                     }
                 }
@@ -6952,7 +7646,7 @@
             }
         }
 
-        function handleRegister() {
+        async function handleRegister() {
             const usernameEl = document.getElementById('registerUsername');
             const passwordEl = document.getElementById('registerPassword');
             const confirmPasswordEl = document.getElementById('registerConfirmPassword');
@@ -6970,7 +7664,7 @@
                 if (typeof showMessage === 'function') {
                     showMessage('请输入用户名', 'error');
                 } else {
-                    alert('请输入用户名');
+                    await customAlert('请输入用户名');
                 }
                 return;
             }
@@ -6979,7 +7673,7 @@
                 if (typeof showMessage === 'function') {
                     showMessage('用户名至少需要4位', 'error');
                 } else {
-                    alert('用户名至少需要4位');
+                    await customAlert('用户名至少需要4位');
                 }
                 return;
             }
@@ -6988,7 +7682,7 @@
                 if (typeof showMessage === 'function') {
                     showMessage('用户名只能包含字母或数字', 'error');
                 } else {
-                    alert('用户名只能包含字母或数字');
+                    await customAlert('用户名只能包含字母或数字');
                 }
                 return;
             }
@@ -6997,7 +7691,7 @@
                 if (typeof showMessage === 'function') {
                     showMessage('请输入密码', 'error');
                 } else {
-                    alert('请输入密码');
+                    await customAlert('请输入密码');
                 }
                 return;
             }
@@ -7006,7 +7700,7 @@
                 if (typeof showMessage === 'function') {
                     showMessage('密码至少需要4位', 'error');
                 } else {
-                    alert('密码至少需要4位');
+                    await customAlert('密码至少需要4位');
                 }
                 return;
             }
@@ -7015,7 +7709,7 @@
                 if (typeof showMessage === 'function') {
                     showMessage('请确认密码', 'error');
                 } else {
-                    alert('请确认密码');
+                    await customAlert('请确认密码');
                 }
                 return;
             }
@@ -7024,7 +7718,7 @@
                 if (typeof showMessage === 'function') {
                     showMessage('两次输入的密码不一致', 'error');
                 } else {
-                    alert('两次输入的密码不一致');
+                    await customAlert('两次输入的密码不一致');
                 }
                 return;
             }
@@ -7073,7 +7767,7 @@
                         if (typeof showMessage === 'function') {
                             showMessage(errorMsg, 'error');
                         } else {
-                            alert(errorMsg);
+                            await customAlert(errorMsg);
                         }
                     }
                 } catch (error) {
@@ -7094,7 +7788,7 @@
                     if (typeof showMessage === 'function') {
                         showMessage(errorMsg, 'error');
                     } else {
-                        alert(errorMsg);
+                        await customAlert(errorMsg);
                     }
                 }
             }
@@ -7340,6 +8034,7 @@
                 handleRegister();
             }
         });
+ 
         function togglePassword(inputId, button) {
             const input = document.getElementById(inputId);
             if (input.type === 'password') {
@@ -7497,7 +8192,7 @@
             const savedServerData = localStorage.getItem('serverData');
             if (savedServerData) {
                 localStorage.removeItem('serverData');
-                console.log('已清除localStorage中的旧服务器数据');
+                // console.log('已清除localStorage中的旧服务器数据');
             }
         } catch (error) {
             console.error('清理localStorage失败:', error);
@@ -7827,6 +8522,7 @@
         }
 
         let updateServerDisplayTimer = null;
+  
         function updateServerDisplay() {
             if (updateServerDisplayTimer) {
                 clearTimeout(updateServerDisplayTimer);
@@ -7929,6 +8625,7 @@
                 }
             }, 50);
         }
+  
         function showAddAdminModal() {
             const modal = document.getElementById('addAdminModal');
             if (!modal) return;
@@ -8034,6 +8731,7 @@
                 updateAdminAccountDisplay();
             }, 150);
         }
+ 
         function showPasswordChangeModal() {
             const modal = document.getElementById('passwordChangeModal');
             if (!modal) return;
@@ -8087,6 +8785,7 @@
                 document.getElementById('newPasswordInput').value = '';
             }, 150);
         }
+ 
         function showRechargeModal() {
             const modal = document.getElementById('rechargeModal');
             if (!modal) return;
@@ -8143,11 +8842,493 @@
             }, 150);
         }
 
+        //#region ID库功能模块
+        let idLibraryAccounts = [];
+        const ID_LIBRARY_STORAGE_KEY = 'idLibraryAccounts';
+
+        function loadIdLibraryFromStorage() {
+            try {
+                const stored = localStorage.getItem(ID_LIBRARY_STORAGE_KEY);
+                if (stored) {
+                    idLibraryAccounts = JSON.parse(stored);
+                    // 确保每个账号都有usageStatus字段
+                    idLibraryAccounts.forEach(acc => {
+                        if (!acc.usageStatus) {
+                            acc.usageStatus = 'new';
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error('加载ID库失败:', e);
+                idLibraryAccounts = [];
+            }
+        }
+
+        function saveIdLibraryToStorage() {
+            try {
+                localStorage.setItem(ID_LIBRARY_STORAGE_KEY, JSON.stringify(idLibraryAccounts));
+            } catch (e) {
+                console.error('保存ID库失败:', e);
+            }
+        }
+
+        // 从服务器同步ID库
+        async function syncIdLibraryFromServer() {
+            try {
+                // 检查 API_BASE_URL 是否定义
+                if (typeof API_BASE_URL === 'undefined') {
+                    console.warn('API_BASE_URL 未定义，跳过服务器同步');
+                    return false;
+                }
+
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000); // 5秒超时
+
+                const response = await fetch(`${API_BASE_URL}/id-library`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.accounts) {
+                        idLibraryAccounts = data.accounts;
+                        saveIdLibraryToStorage();
+                        renderIdLibraryList();
+                        return true;
+                    }
+                } else {
+                    console.warn('从服务器同步ID库失败: HTTP', response.status);
+                }
+            } catch (e) {
+                // 静默处理错误，不影响本地功能
+                if (e.name === 'AbortError') {
+                    console.warn('从服务器同步ID库超时');
+                } else {
+                    console.warn('从服务器同步ID库失败:', e.message || e);
+                }
+            }
+            return false;
+        }
+
+        // 同步ID库到所有服务器
+        async function syncIdLibraryToServer() {
+            try {
+                // 检查 API_BASE_URL 是否定义
+                if (typeof API_BASE_URL === 'undefined') {
+                    console.warn('API_BASE_URL 未定义，跳过服务器同步');
+                    return false;
+                }
+
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10秒超时
+
+                const response = await fetch(`${API_BASE_URL}/id-library`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        accounts: idLibraryAccounts.map(acc => ({
+                            appleId: acc.appleId,
+                            password: acc.password,
+                            status: acc.status || 'normal',
+                            usageStatus: acc.usageStatus || 'new'
+                        }))
+                    }),
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        console.log('ID库同步成功:', data.message);
+                        return true;
+                    }
+                } else {
+                    console.warn('同步ID库到服务器失败: HTTP', response.status);
+                }
+            } catch (e) {
+                // 静默处理错误，不影响本地功能
+                if (e.name === 'AbortError') {
+                    console.warn('同步ID库到服务器超时');
+                } else {
+                    console.warn('同步ID库到服务器失败:', e.message || e);
+                }
+            }
+            return false;
+        }
+
+        // 从服务器删除ID
+        async function deleteIdFromServer(appleId) {
+            try {
+                // 检查 API_BASE_URL 是否定义
+                if (typeof API_BASE_URL === 'undefined') {
+                    return false;
+                }
+
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000); // 5秒超时
+
+                const response = await fetch(`${API_BASE_URL}/id-library/${encodeURIComponent(appleId)}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                return response.ok;
+            } catch (e) {
+                // 静默处理错误
+                if (e.name !== 'AbortError') {
+                    console.warn('从服务器删除ID失败:', e.message || e);
+                }
+                return false;
+            }
+        }
+
+        // 更新ID的使用状态到服务器
+        async function updateIdUsageStatusOnServer(appleId, usageStatus) {
+            try {
+                // 检查 API_BASE_URL 是否定义
+                if (typeof API_BASE_URL === 'undefined') {
+                    return false;
+                }
+
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000); // 5秒超时
+
+                const response = await fetch(`${API_BASE_URL}/id-library/${encodeURIComponent(appleId)}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        usageStatus: usageStatus
+                    }),
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                return response.ok;
+            } catch (e) {
+                // 静默处理错误
+                if (e.name !== 'AbortError') {
+                    console.warn('更新ID使用状态失败:', e.message || e);
+                }
+                return false;
+            }
+        }
+
+        async function showIdLibraryModal() {
+            const modal = document.getElementById('idLibraryModal');
+            if (!modal) return;
+
+            // 先尝试从服务器同步数据（静默失败，不影响本地功能）
+            try {
+                await syncIdLibraryFromServer();
+            } catch (e) {
+                // 忽略同步错误
+            }
+            
+            // 如果服务器同步失败或没有数据，则从本地存储加载
+            if (idLibraryAccounts.length === 0) {
+                loadIdLibraryFromStorage();
+            }
+            renderIdLibraryList();
+
+            document.getElementById('idLibraryAppleId').value = '';
+            document.getElementById('idLibraryPassword').value = '';
+
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.classList.add('show');
+                document.getElementById('idLibraryAppleId').focus();
+            }, 10);
+        }
+
+        function closeIdLibraryModal() {
+            const modal = document.getElementById('idLibraryModal');
+            if (!modal) return;
+
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 150);
+        }
+
+        function toggleIdLibraryPassword() {
+            const input = document.getElementById('idLibraryPassword');
+            const btn = input.parentElement.querySelector('.password-toggle-btn');
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                btn.textContent = '👁';
+            }
+        }
+
+        async function saveIdLibraryAccount() {
+            const appleId = document.getElementById('idLibraryAppleId').value.trim();
+            const password = document.getElementById('idLibraryPassword').value.trim();
+
+            if (!appleId) {
+                await customAlert('请输入Apple ID');
+                return;
+            }
+            if (!password) {
+                await customAlert('请输入密码');
+                return;
+            }
+
+            const exists = idLibraryAccounts.find(acc => acc.appleId.toLowerCase() === appleId.toLowerCase());
+            if (exists) {
+                if (await customConfirm(`账号 ${appleId} 已存在，是否更新密码？`)) {
+                    exists.password = password;
+                    exists.updatedAt = new Date().toISOString();
+                } else {
+                    return;
+                }
+            } else {
+                idLibraryAccounts.push({
+                    appleId: appleId,
+                    password: password,
+                    status: 'normal',
+                    usageStatus: 'new',
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                });
+            }
+
+            saveIdLibraryToStorage();
+            renderIdLibraryList();
+            
+            // 尝试同步到服务器（静默失败，不影响本地功能）
+            try {
+                await syncIdLibraryToServer();
+            } catch (e) {
+                // 忽略同步错误
+            }
+
+            document.getElementById('idLibraryAppleId').value = '';
+            document.getElementById('idLibraryPassword').value = '';
+            document.getElementById('idLibraryAppleId').focus();
+        }
+
+        function importIdLibraryAccounts() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.txt,.csv';
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                try {
+                    const text = await file.text();
+                    const lines = text.split(/\r?\n/).filter(line => line.trim());
+                    let imported = 0;
+                    let skipped = 0;
+
+                    for (const line of lines) {
+                        const parts = line.split(/[,\t:\-]+/).map(p => p.trim());
+                        if (parts.length >= 2) {
+                            const appleId = parts[0];
+                            const password = parts[1];
+
+                            if (appleId && password) {
+                                const exists = idLibraryAccounts.find(acc => acc.appleId.toLowerCase() === appleId.toLowerCase());
+                                if (!exists) {
+                                    idLibraryAccounts.push({
+                                        appleId: appleId,
+                                        password: password,
+                                        status: 'normal',
+                                        usageStatus: 'new',
+                                        createdAt: new Date().toISOString(),
+                                        updatedAt: new Date().toISOString()
+                                    });
+                                    imported++;
+                                } else {
+                                    skipped++;
+                                }
+                            }
+                        }
+                    }
+
+                    saveIdLibraryToStorage();
+                    renderIdLibraryList();
+                    
+                    // 尝试同步到服务器（静默失败，不影响本地功能）
+                    try {
+                        await syncIdLibraryToServer();
+                    } catch (e) {
+                        // 忽略同步错误
+                    }
+                    
+                    await customAlert(`导入完成！\n新增: ${imported} 个\n跳过(已存在): ${skipped} 个`);
+                } catch (err) {
+                    console.error('导入失败:', err);
+                    await customAlert('导入失败: ' + err.message);
+                }
+            };
+            input.click();
+        }
+
+        async function clearAllIdLibraryAccounts() {
+            if (idLibraryAccounts.length === 0) {
+                await customAlert('列表已为空');
+                return;
+            }
+
+            if (await customConfirm(`确定要清空所有 ${idLibraryAccounts.length} 个账号吗？\n此操作不可恢复！`)) {
+                // 尝试从服务器删除所有ID（静默失败，不影响本地功能）
+                try {
+                    for (const account of idLibraryAccounts) {
+                        await deleteIdFromServer(account.appleId);
+                    }
+                } catch (e) {
+                    // 忽略删除错误
+                }
+                
+                idLibraryAccounts = [];
+                saveIdLibraryToStorage();
+                renderIdLibraryList();
+            }
+        }
+
+        async function deleteIdLibraryAccount(index) {
+            if (index < 0 || index >= idLibraryAccounts.length) return;
+
+            const account = idLibraryAccounts[index];
+            if (await customConfirm(`确定要删除账号 ${account.appleId} 吗？`)) {
+                idLibraryAccounts.splice(index, 1);
+                saveIdLibraryToStorage();
+                renderIdLibraryList();
+                
+                // 尝试从服务器删除（静默失败，不影响本地功能）
+                try {
+                    await deleteIdFromServer(account.appleId);
+                } catch (e) {
+                    // 忽略删除错误
+                }
+            }
+        }
+
+        function fillIdLibraryAccount(index) {
+            if (index < 0 || index >= idLibraryAccounts.length) return;
+
+            const account = idLibraryAccounts[index];
+            document.getElementById('idLibraryAppleId').value = account.appleId;
+            document.getElementById('idLibraryPassword').value = account.password;
+            document.getElementById('idLibraryAppleId').focus();
+        }
+
+        function toggleIdLibraryAccountStatus(index) {
+            if (index < 0 || index >= idLibraryAccounts.length) return;
+
+            const account = idLibraryAccounts[index];
+            account.status = account.status === 'normal' ? 'error' : 'normal';
+            account.updatedAt = new Date().toISOString();
+            saveIdLibraryToStorage();
+            renderIdLibraryList();
+            
+            // 尝试同步到服务器（静默失败，不影响本地功能）
+            try {
+                syncIdLibraryToServer();
+            } catch (e) {
+                // 忽略同步错误
+            }
+        }
+
+        async function toggleIdLibraryUsageStatus(index) {
+            if (index < 0 || index >= idLibraryAccounts.length) return;
+
+            const account = idLibraryAccounts[index];
+            const newStatus = account.usageStatus === 'new' ? 'used' : 'new';
+            account.usageStatus = newStatus;
+            account.updatedAt = new Date().toISOString();
+            saveIdLibraryToStorage();
+            renderIdLibraryList();
+            
+            // 尝试同步到服务器（静默失败，不影响本地功能）
+            try {
+                await updateIdUsageStatusOnServer(account.appleId, newStatus);
+            } catch (e) {
+                // 忽略同步错误
+            }
+        }
+
+        function maskPassword(password) {
+            if (!password) return '';
+            if (password.length <= 4) return '****';
+            return password.substring(0, 2) + '****' + password.substring(password.length - 2);
+        }
+
+        function renderIdLibraryList() {
+            const listContainer = document.getElementById('idLibraryList');
+            if (!listContainer) return;
+
+            if (idLibraryAccounts.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="id-library-empty">
+                        <div class="empty-icon">📭</div>
+                        <div class="empty-text">暂无账号</div>
+                        <div class="empty-hint">点击"保存"添加账号，或"导入"批量导入</div>
+                    </div>
+                `;
+            } else {
+                listContainer.innerHTML = idLibraryAccounts.map((account, index) => `
+                    <div class="id-library-item ${account.status === 'error' ? 'error' : ''}">
+                        <div class="item-col col-index">${index + 1}</div>
+                        <div class="item-col col-account">${escapeHtml(account.appleId)}</div>
+                        <div class="item-col col-password">${maskPassword(account.password)}</div>
+                        <div class="item-col col-status">
+                            <span class="status-badge ${account.status || 'normal'}" onclick="toggleIdLibraryAccountStatus(${index})" style="cursor: pointer;" title="点击切换状态">
+                                ${(account.status || 'normal') === 'normal' ? '正常' : '异常'}
+                            </span>
+                        </div>
+                        <div class="item-col col-usage-status">
+                            <span class="usage-status-badge ${account.usageStatus || 'new'}" onclick="toggleIdLibraryUsageStatus(${index})" title="点击切换使用状态">
+                                ${(account.usageStatus || 'new') === 'new' ? 'NEW' : 'USED'}
+                            </span>
+                        </div>
+                        <div class="item-col col-actions">
+                            <button class="item-action-btn btn-fill" onclick="fillIdLibraryAccount(${index})" title="填充到输入框">填充</button>
+                            <button class="item-action-btn btn-delete" onclick="deleteIdLibraryAccount(${index})" title="删除此账号">删除</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            const normalCount = idLibraryAccounts.filter(acc => acc.status === 'normal').length;
+            const errorCount = idLibraryAccounts.filter(acc => acc.status === 'error').length;
+
+            document.getElementById('idLibraryTotal').textContent = idLibraryAccounts.length;
+            document.getElementById('idLibraryNormal').textContent = normalCount;
+            document.getElementById('idLibraryError').textContent = errorCount;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        //#endregion
+
         let currentRechargeUserId = null;
         async function verifyRechargeUser() {
             const userId = document.getElementById('rechargeUserIdInput').value.trim();
             if (!userId) {
-                alert('请输入用户ID');
+                await customAlert('请输入用户ID');
                 return;
             }
 
@@ -8155,7 +9336,7 @@
                 const creditsResp = await fetch(`${API_BASE_URL}/user/${userId}/credits`);
                 if (!creditsResp.ok) {
                     if (creditsResp.status === 404) {
-                        alert('用户不存在');
+                        await customAlert('用户不存在');
                         return;
                     }
                     throw new Error('获取用户信息失败');
@@ -8163,7 +9344,7 @@
 
                 const creditsData = await creditsResp.json();
                 if (!creditsData.success) {
-                    alert('用户不存在');
+                    await customAlert('用户不存在');
                     return;
                 }
 
@@ -8216,7 +9397,7 @@
 
             } catch (error) {
                 console.error('验证用户失败:', error);
-                alert('验证用户失败: ' + error.message);
+                await customAlert('验证用户失败: ' + error.message);
             }
         }
 
@@ -8259,17 +9440,17 @@
 
         async function confirmRecharge() {
             if (!currentRechargeUserId) {
-                alert('请先验证用户');
+                await customAlert('请先验证用户');
                 return;
             }
 
             const amount = parseFloat(document.getElementById('rechargeAmountInput').value);
             if (!amount || amount <= 0) {
-                alert('请输入有效的充值金额');
+                await customAlert('请输入有效的充值金额');
                 return;
             }
 
-            if (!confirm(`确认给用户 ${currentRechargeUserId} 充值 ${amount} 积分吗？`)) {
+            if (!await customConfirm(`确认给用户 ${currentRechargeUserId} 充值 ${amount} 积分吗？`)) {
                 return;
             }
 
@@ -8286,24 +9467,16 @@
 
                 const data = await response.json();
                 if (data.success) {
-                    if (typeof showMessage === 'function') {
-                        showMessage(`充值成功！用户当前余额: ${data.credits.toFixed(2)}`, 'success');
-                    } else {
-                        alert(`充值成功！用户当前余额: ${data.credits.toFixed(2)}`);
-                    }
+                    await customAlert(`充值成功！用户当前余额: ${data.credits.toFixed(2)}`);
                     document.getElementById('rechargeAmountInput').value = '';
                     await verifyRechargeUser();
                 } else {
                     const errorMsg = data.message || '未知错误';
-                    if (typeof showMessage === 'function') {
-                        showMessage('充值失败: ' + errorMsg, 'error');
-                    } else {
-                        alert('充值失败: ' + errorMsg);
-                    }
+                    await customAlert('充值失败: ' + errorMsg);
                 }
             } catch (error) {
                 console.error('充值失败:', error);
-                alert('充值失败: ' + error.message);
+                await customAlert('充值失败: ' + error.message);
             }
         }
 
@@ -9862,7 +11035,7 @@
                             if (typeof showMessage === 'function') {
                                 showMessage(errorMsg, 'error');
                             } else {
-                                alert(errorMsg);
+                                await customAlert(errorMsg);
                             }
                         }
                     } catch (error) {
@@ -9871,7 +11044,7 @@
                         if (typeof showMessage === 'function') {
                             showMessage(errorMsg, 'error');
                         } else {
-                            alert(errorMsg);
+                            await customAlert(errorMsg);
                         }
                         return;
                     }
@@ -9904,10 +11077,6 @@
         let logScrollPending = false;
         let conversationScrollPending = false;
 
-        let currentUserId = null;
-        let authToken = null;
-        let activeWs = null;
-        let activeWsServer = null;
         const _taskWsWaiters = new Map();
 
         function _ensureTaskWaiter(taskId, timeoutMs = 30 * 60 * 1000) {
@@ -9926,74 +11095,77 @@
             return waiter;
         }
 
-        function buildApiWsUrl() {
-            let base = (API_BASE_URL || '').trim();
-            if (!base) return null;
-            base = base.replace(/\/+$/, '');
-            if (base.endsWith('/api')) base = base.slice(0, -4);
-
-            if (base.startsWith('https://')) base = 'wss://' + base.slice('https://'.length);
-            else if (base.startsWith('http://')) base = 'ws://' + base.slice('http://'.length);
-            else if (!base.startsWith('ws://') && !base.startsWith('wss://')) base = 'ws://' + base;
-
-            base = base.replace(/\/+$/, '');
-            return base + '/ws/client';
-        }
-
         function connectToBackendWS(_serverIgnored) {
-            const wsUrl = buildApiWsUrl();
-            if (!wsUrl) {
-                showMessage('未配置 API 地址，无法建立WS连接', 'error');
+            // 零轮询架构：使用 WebSocket 实时推送，无任何 HTTP 轮询
+            if (activeWs && activeWs.readyState === WebSocket.OPEN) {
+                console.log('[WebSocket] 已连接，跳过初始化');
                 return;
             }
 
+            if (!authToken || !currentUserId) {
+                console.warn('[WebSocket] 未登录，无法连接 WebSocket');
+                return;
+            }
+
+            // 将 HTTP API 地址转换为 WebSocket 地址
+            const wsUrl = `${API_BASE_URL.replace('http://', 'ws://').replace('https://', 'wss://')}/ws`;
+            console.log('[WebSocket] 正在连接到:', wsUrl);
+
             try {
-                if (activeWs && activeWs.readyState === WebSocket.OPEN) {
-                    activeWs.close();
-                }
-            } catch { /* ignore */ }
+                activeWs = new WebSocket(wsUrl);
 
-            activeWsServer = null;
-            activeWs = new WebSocket(wsUrl);
-
-            activeWs.onopen = () => {
-                const authMsg = {
-                    action: 'authenticate',
-                    data: {
-                        user_id: currentUserId || localStorage.getItem('user_id'),
-                        token: authToken || localStorage.getItem('auth_token'),
+                activeWs.onopen = () => {
+                    console.log('[WebSocket] 连接成功！发送认证信息...');
+                    // 发送认证消息
+                    activeWs.send(JSON.stringify({
+                        action: 'auth',
+                        data: { 
+                            token: authToken, 
+                            user_id: currentUserId 
+                        }
+                    }));
+                    
+                    // 订阅服务器更新
+                    try { 
+                        sendWSCommand('subscribe_servers', {}); 
+                    } catch (e) { 
+                        console.warn('[WebSocket] 订阅服务器失败:', e); 
                     }
                 };
-                activeWs.send(JSON.stringify(authMsg));
-                try { updateConnectionStatus(true); } catch { /* ignore */ }
-                resetInboxOnConnect();
-                showMessage(`已连接中心API（实时）`, 'success');
-            };
 
-            activeWs.onmessage = (evt) => {
-                try {
-                    const msg = JSON.parse(evt.data);
-                    handleServerMessage(msg, null);
-                } catch (e) {
-                    console.error('WS消息解析失败:', e);
-                }
-            };
-
-            activeWs.onclose = () => {
-                activeWs = null;
-                try { updateConnectionStatus(false); } catch { /* ignore */ }
-                showMessage('中心API连接已断开，5秒后自动重连...', 'error');
-                setTimeout(() => {
-                    if (!activeWs && currentUserId) {
-                        console.log('尝试重新连接WebSocket...');
-                        connectToBackendWS(null);
+                activeWs.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        // 使用已有的消息处理器
+                        handleServerMessage(data, null);
+                    } catch (e) {
+                        console.error('[WebSocket] 消息解析失败:', e, event.data);
                     }
-                }, 5000);
-            };
+                };
 
-            activeWs.onerror = (e) => {
-                console.error('WebSocket error:', e);
-            };
+                activeWs.onerror = (error) => {
+                    console.error('[WebSocket] 连接错误:', error);
+                    showMessage('WebSocket 连接错误，请检查网络', 'error');
+                };
+
+                activeWs.onclose = (event) => {
+                    console.log('[WebSocket] 连接关闭 (code:', event.code, ', reason:', event.reason, ')');
+                    activeWs = null;
+                    
+                    // 自动重连（5秒后）
+                    if (checkAuth()) {
+                        console.log('[WebSocket] 5秒后尝试重连...');
+                        setTimeout(() => {
+                            if (checkAuth()) {
+                                connectToBackendWS(null);
+                            }
+                        }, 5000);
+                    }
+                };
+            } catch (e) {
+                console.error('[WebSocket] 初始化失败:', e);
+                activeWs = null;
+            }
         }
 
         function sendWSCommand(action, data = {}) {
@@ -10652,18 +11824,19 @@
         }
 
         //#endregion
-        //#region 发送短信API交互功能模块（创建任务、分配任务、轮询状态、显示结果）
-        // create(必须带用户token) -> assign(必要；否则shard没有server_id后端拉不到) -> 等待status=done（优先SSE，失败再轮询）
+        //#region 发送短信API交互功能模块（零轮询：WebSocket 实时推送）
+        // 零轮询架构：create(生成任务) -> API 立即推送到 Worker -> WebSocket 实时接收进度
 
         function _sleep(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
 
-        const USE_TASK_SSE = false;
+        // 🚫 已删除：const USE_TASK_SSE - 零轮询架构仅使用 WebSocket
 
         function _authToken() {
             return localStorage.getItem('auth_token') || '';
         }
+
 
         const _activeTaskWatcher = {
             taskId: null,
@@ -10738,169 +11911,72 @@
             return data;
         }
 
-        function calculatePollingInterval(totalTasks, backendCount = 10) {
-            const tasksPerCycle = 100;
-            const timePerCycle = 10;
-            const x = totalTasks / tasksPerCycle;
-            const y = backendCount;
-            const z = x / y;
-            let a = z;
-
-            const first = Math.max(1, Math.round(a));
-            if (a > 30) {
-                return { firstInterval: first * 1000, regularInterval: 10 * 1000 };
-            } else {
-                return { firstInterval: first * 1000, regularInterval: first * 1000 };
-            }
-        }
-
-        function _watchTaskViaSSE(taskId, onUpdate) {
-            return new Promise((resolve, reject) => {
-                try {
-                    const es = new EventSource(`${API_BASE_URL}/task/${taskId}/events?interval=1&max_seconds=1800`);
-                    _activeTaskWatcher.eventSource = es;
-                    _activeTaskWatcher.taskId = taskId;
-
-                    es.onmessage = (evt) => {
-                        try {
-                            const payload = JSON.parse(evt.data || '{}');
-                            if (payload && typeof onUpdate === 'function') onUpdate(payload);
-                            if (payload && payload.status === 'done') {
-                                es.close();
-                                _activeTaskWatcher.eventSource = null;
-                                resolve(payload);
-                            }
-                        } catch (e) {
-                            console.warn('SSE payload parse failed:', e);
-                        }
-                    };
-
-                    es.addEventListener('end', () => {
-                        try { es.close(); } catch { /* ignore */ }
-                        _activeTaskWatcher.eventSource = null;
-                        _fetchTaskStatus(taskId).then(resolve).catch(reject);
-                    });
-
-                    es.addEventListener('error', (e) => {
-                        try { es.close(); } catch { /* ignore */ }
-                        _activeTaskWatcher.eventSource = null;
-                        reject(new Error('SSE连接失败'));
-                    });
-                } catch (e) {
-                    reject(e);
-                }
-            });
-        }
-
-        async function _watchTaskViaPolling(taskId, onUpdate) {
-            const totalTasks = Number(_activeTaskWatcher.totalTasks || 0);
-            const deadline = Date.now() + 30 * 60 * 1000;
-            const intervals = calculatePollingInterval(_activeTaskWatcher.totalTasks || 0, 10);
-            const firstWaitMs = intervals.firstInterval;
-            const regularMs = intervals.regularInterval;
-
-            await _sleep(firstWaitMs);
-
-            const noProgressTimeoutMs =
-                totalTasks <= 5 ? 60 * 1000 :
-                totalTasks <= 100 ? 3 * 60 * 1000 :
-                10 * 60 * 1000;
-            let lastKey = null;
-            let lastProgressAt = Date.now();
-
-            while (true) {
-                if (_activeTaskWatcher.taskId !== taskId) {
-                    throw new Error('任务等待已取消');
-                }
-                if (Date.now() > deadline) {
-                    throw new Error('等待任务超时（30分钟）');
-                }
-                const data = await _fetchTaskStatus(taskId);
-                const payload = {
-                    task_id: taskId,
-                    status: data.status,
-                    shards: data.shards || {},
-                    result: data.result || {}
-                };
-                if (typeof onUpdate === 'function') onUpdate(payload);
-                if (data.status === 'done') return payload;
-
-                const sc = payload.shards || {};
-                const rp = payload.result || {};
-                const key = [
-                    payload.status || '',
-                    sc.pending || 0,
-                    sc.running || 0,
-                    sc.done || 0,
-                    sc.total || 0,
-                    rp.success || 0,
-                    rp.fail || 0,
-                    rp.sent || 0,
-                ].join('|');
-                if (key !== lastKey) {
-                    lastKey = key;
-                    lastProgressAt = Date.now();
-                } else {
-                    if (Date.now() - lastProgressAt > noProgressTimeoutMs) {
-                        throw new Error('任务长时间无进展（可能后端上报失败 / API未更新状态），已停止轮询');
-                    }
-                }
-
-                await _sleep(regularMs);
-            }
-        }
+        // 🚫 已删除：calculatePollingInterval - 零轮询架构不需要轮询间隔计算
+        // 🚫 已删除：_watchTaskViaSSE - 零轮询架构使用 WebSocket 实时推送
+        // 🚫 已删除：_watchTaskViaPolling - 零轮询架构不使用 HTTP 轮询
 
         async function _waitTaskDone(taskId, totalTasks = 0) {
+            // 零轮询架构：纯 WebSocket 推送等待，无任何 HTTP 轮询
+            if (!activeWs || activeWs.readyState !== WebSocket.OPEN) {
+                throw new Error('WebSocket 未连接，无法监听任务进度。请刷新页面重试。');
+            }
+
             _stopTaskWatchersOnly();
             _activeTaskWatcher.taskId = taskId;
             _activeTaskWatcher.totalTasks = totalTasks;
 
-            let last = null;
-            let lastLogKey = null;
-            let lastLogAt = 0;
-            const onUpdate = (payload) => {
-                last = payload;
-                try {
-                    const sc = payload.shards || {};
-                    const rp = payload.result || {};
-                    if (payload.status === 'pending' || payload.status === 'running') {
-                        const key = `${payload.status}|${sc.done || 0}/${sc.total || 0}|${rp.success || 0}|${rp.fail || 0}|${rp.sent || 0}`;
-                        const now = Date.now();
-                        if (key !== lastLogKey || (now - lastLogAt) > 15000) {
-                            lastLogKey = key;
-                            lastLogAt = now;
-                            console.log(`任务 ${taskId} 进行中... shard ${sc.done || 0}/${sc.total || 0} 成功 ${rp.success || 0} 失败 ${rp.fail || 0}`);
-                        }
-                    }
-                } catch { /* ignore */ }
-            };
+            // 创建 Promise 等待 WebSocket 推送的任务完成消息
+            return new Promise((resolve, reject) => {
+                const timeoutId = setTimeout(() => {
+                    _taskWsWaiters.delete(taskId);
+                    reject(new Error('任务等待超时（30分钟）'));
+                }, 30 * 60 * 1000);
 
-            if (USE_TASK_SSE) {
-                try {
-                    return await _watchTaskViaSSE(taskId, onUpdate);
-                } catch {
-                }
-            }
-            return await _watchTaskViaPolling(taskId, onUpdate);
+                const waiter = { 
+                    promise: null, 
+                    resolve: (payload) => {
+                        clearTimeout(timeoutId);
+                        _taskWsWaiters.delete(taskId);
+                        console.log(`[WebSocket] 任务 ${taskId} 完成`);
+                        resolve(payload);
+                    }, 
+                    reject: (err) => {
+                        clearTimeout(timeoutId);
+                        _taskWsWaiters.delete(taskId);
+                        reject(err);
+                    }, 
+                    timeoutId 
+                };
+                
+                _taskWsWaiters.set(taskId, waiter);
+                console.log(`[WebSocket] 等待任务 ${taskId} 通过 WebSocket 推送完成...`);
+            });
         }
 
-        // --- WS模式 startSending()：一次点击=一次WS请求；后端实时推送进度 ---
+
+        // --- 零轮询架构：WebSocket 实时推送模式 ---
         async function startSending() {
             if (!currentUserId) {
-                alert("请先登录");
-                        return;
-                    }
+                await customAlert("请先登录");
+                return;
+            }
             if (isSending) {
-                alert("已有任务正在执行，请等待当前任务完成");
-                            return;
-                        }
+                await customAlert("已有任务正在执行，请等待当前任务完成");
+                return;
+            }
 
             const numbersText = document.getElementById('numbersText').value || "";
             const message = document.getElementById('messageText').value || "";
             if (!numbersText.trim() || !message.trim()) {
-                alert("号码或内容为空");
-                            return;
-                        }
+                await customAlert("号码或内容为空");
+                return;
+            }
+
+            // 检查 WebSocket 连接状态
+            if (!activeWs || activeWs.readyState !== WebSocket.OPEN) {
+                await customAlert("WebSocket 未连接，无法发送任务。\n\n请刷新页面重试或检查网络连接。");
+                return;
+            }
 
             isSending = true;
             updateButtonState();
@@ -10911,29 +11987,30 @@
                     .map(s => (s || '').trim())
                     .filter(Boolean);
 
+                // 1. 创建任务（API 会立即推送给 Worker）
                 const taskId = await _createTask({ message, numbers, taskType: 'normal' });
+                console.log(`[零轮询] 任务 ${taskId} 已创建，等待 WebSocket 推送结果...`);
 
+                // 2. 订阅任务更新（通过 WebSocket）
                 const ok = sendWSCommand('subscribe_task', { task_id: taskId });
                 if (!ok) {
-                    const result = await _waitTaskDone(taskId, numbers.length);
-                    if (result && result.status === 'done') {
-                        isSending = false;
-                        updateButtonState();
-                    }
-                    return;
+                    throw new Error('订阅任务失败：WebSocket 未连接');
                 }
+
+                // 3. 等待 WebSocket 推送的任务完成消息（无轮询）
                 const waiter = _ensureTaskWaiter(taskId);
                 await waiter.promise;
+
+                console.log(`[零轮询] 任务 ${taskId} 已完成`);
             } catch (err) {
-                console.error("startSending error:", err);
-                alert("发送失败: " + (err && err.message ? err.message : "未知错误"));
+                console.error("[startSending error]", err);
+                await customAlert("发送失败: " + (err && err.message ? err.message : "未知错误"));
             } finally {
-                if (isSending && (!activeWs || activeWs.readyState !== WebSocket.OPEN)) {
-                    isSending = false;
-                    updateButtonState();
-                }
+                isSending = false;
+                updateButtonState();
             }
         }
+
 
         function updateButtonState() {
             const sendBtn = document.getElementById('sendBtn');
@@ -10944,7 +12021,7 @@
                 sendBtn.textContent = '发送';
             }
         }
-        //#endregion 发送短信API交互功能模块（创建任务、分配任务、轮询状态、显示结果）
+        //#endregion 发送短信API交互功能模块（零轮询：WebSocket 实时推送）
         //#region 收件箱模块（C版面板 - 消息接收和回复）
         function updateNotificationCount() {
             const navInboxBtn = document.getElementById('navInboxBtn');
