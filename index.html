@@ -6,6 +6,8 @@
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
     <title>AutoSender Pro</title>
+    <!-- 添加 favicon，避免404错误 -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>📨</text></svg>">
     <!-- 全局样式和字体设置 -->
     <style>
         /*#region 全局样式和字体设置 */
@@ -8219,13 +8221,18 @@
 
         async function testAPIConnection() {
             try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000);
+                
                 const response = await fetch(`${API_BASE_URL}/servers`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    signal: AbortSignal.timeout(10000)
+                    signal: controller.signal
                 });
+                
+                clearTimeout(timeoutId);
                 return { success: true, status: response.status };
             } catch (error) {
                 console.error('API连接测试失败:', error);
@@ -8246,13 +8253,19 @@
         let _serversLoadedOnce = false;
         async function loadServersFromAPI() {
             try {
+                // 创建带超时的 fetch controller
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000);
+                
                 const response = await fetch(`${API_BASE_URL}/servers?t=${Date.now()}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    signal: AbortSignal.timeout(10000)
+                    signal: controller.signal
                 });
+                
+                clearTimeout(timeoutId);
 
                 if (!response.ok) {
                     throw new Error(`API响应错误: ${response.status} ${response.statusText}`);
@@ -11121,10 +11134,12 @@
                 activeWs.onopen = () => {
                     console.log('[WebSocket] 连接成功！');
                     
-                    // 订阅用户更新
-                    sendWSCommand('subscribe_user', { user_id: currentUserId });
-                    
-                    showMessage('已连接到实时推送服务', 'success');
+                    // 使用 setTimeout 确保 WebSocket 状态完全同步
+                    setTimeout(() => {
+                        // 订阅用户更新
+                        sendWSCommand('subscribe_user', { user_id: currentUserId });
+                        showMessage('已连接到实时推送服务', 'success');
+                    }, 100);
                 };
 
                 activeWs.onmessage = (event) => {
