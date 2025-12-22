@@ -6834,10 +6834,12 @@
                 <button class="modal-close" onclick="closeAdminModal()">×</button>
             </div>
             <div class="modal-content">
-                <label class="modal-label">请输入管理员密码：</label>
-                <input type="password" class="modal-input" id="adminPasswordInput" placeholder="管理员密码">
-                <button class="modal-btn" onclick="verifyAdminPassword()">确 认</button>
-                <div class="modal-message" id="adminMessage"></div>
+                <form onsubmit="event.preventDefault(); verifyAdminPassword();" autocomplete="off">
+                    <label class="modal-label">请输入管理员密码：</label>
+                    <input type="password" class="modal-input" id="adminPasswordInput" placeholder="管理员密码" autocomplete="current-password">
+                    <button type="submit" class="modal-btn">确 认</button>
+                    <div class="modal-message" id="adminMessage"></div>
+                </form>
             </div>
         </div>
     </div>
@@ -6851,12 +6853,14 @@
                 <button class="custom-modal-close" onclick="closePasswordChangeModal()">×</button>
             </div>
             <div class="custom-modal-content">
-                <input type="password" class="custom-modal-input" id="oldPasswordInput" placeholder="请输入旧密码">
-                <input type="password" class="custom-modal-input" id="newPasswordInput" placeholder="新密码">
-                <div class="custom-modal-buttons">
-                    <button class="custom-modal-btn cancel" onclick="closePasswordChangeModal()">取消</button>
-                    <button class="custom-modal-btn confirm" onclick="updateServerManagerPassword()">确定</button>
-                </div>
+                <form onsubmit="event.preventDefault(); updateServerManagerPassword();" autocomplete="off">
+                    <input type="password" class="custom-modal-input" id="oldPasswordInput" placeholder="请输入旧密码" autocomplete="current-password">
+                    <input type="password" class="custom-modal-input" id="newPasswordInput" placeholder="新密码" autocomplete="new-password">
+                    <div class="custom-modal-buttons">
+                        <button type="button" class="custom-modal-btn cancel" onclick="closePasswordChangeModal()">取消</button>
+                        <button type="submit" class="custom-modal-btn confirm">确定</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -6870,22 +6874,24 @@
             </div>
             <div class="custom-modal-content id-library-content">
                 <!-- 顶部操作栏 -->
-                <div class="id-library-toolbar">
-                    <div class="id-library-input-group">
-                        <label>APPLE ID</label>
-                        <input type="text" class="id-library-input" id="idLibraryAppleId" placeholder="输入Apple ID邮箱">
-                    </div>
-                    <div class="id-library-input-group">
-                        <label>PASSWORD</label>
-                        <div class="password-input-wrapper">
-                            <input type="password" class="id-library-input" id="idLibraryPassword" placeholder="输入密码">
-                            <button class="password-toggle-btn" onclick="toggleIdLibraryPassword()">👁</button>
+                <form onsubmit="event.preventDefault(); saveIdLibraryAccount();" autocomplete="off">
+                    <div class="id-library-toolbar">
+                        <div class="id-library-input-group">
+                            <label>APPLE ID</label>
+                            <input type="text" class="id-library-input" id="idLibraryAppleId" placeholder="输入Apple ID邮箱" autocomplete="username">
                         </div>
+                        <div class="id-library-input-group">
+                            <label>PASSWORD</label>
+                            <div class="password-input-wrapper">
+                                <input type="password" class="id-library-input" id="idLibraryPassword" placeholder="输入密码" autocomplete="current-password">
+                                <button type="button" class="password-toggle-btn" onclick="toggleIdLibraryPassword()">👁</button>
+                            </div>
+                        </div>
+                        <button type="submit" class="id-library-btn btn-save">💾 保存</button>
+                        <button type="button" class="id-library-btn btn-import" onclick="importIdLibraryAccounts()">📂 导入</button>
+                        <button type="button" class="id-library-btn btn-clear" onclick="clearAllIdLibraryAccounts()">🗑️ 清空</button>
                     </div>
-                    <button class="id-library-btn btn-save" onclick="saveIdLibraryAccount()">💾 保存</button>
-                    <button class="id-library-btn btn-import" onclick="importIdLibraryAccounts()">📂 导入</button>
-                    <button class="id-library-btn btn-clear" onclick="clearAllIdLibraryAccounts()">🗑️ 清空</button>
-                </div>
+                </form>
 
                 <!-- 账号列表区域 -->
                 <div class="id-library-list-container">
@@ -6998,12 +7004,14 @@
                 <button class="custom-modal-close" onclick="closeAddAdminModal()">×</button>
             </div>
             <div class="custom-modal-content">
-                <input type="text" class="custom-modal-input" id="newAdminId" placeholder="管理员ID">
-                <input type="password" class="custom-modal-input" id="newAdminPassword" placeholder="密码">
-                <div class="custom-modal-buttons">
-                    <button class="custom-modal-btn cancel" onclick="closeAddAdminModal()">取消</button>
-                    <button class="custom-modal-btn confirm" onclick="addAdminAccount()">确定</button>
-                </div>
+                <form onsubmit="event.preventDefault(); addAdminAccount();" autocomplete="off">
+                    <input type="text" class="custom-modal-input" id="newAdminId" placeholder="管理员ID" autocomplete="username">
+                    <input type="password" class="custom-modal-input" id="newAdminPassword" placeholder="密码" autocomplete="new-password">
+                    <div class="custom-modal-buttons">
+                        <button type="button" class="custom-modal-btn cancel" onclick="closeAddAdminModal()">取消</button>
+                        <button type="submit" class="custom-modal-btn confirm">确定</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -8219,6 +8227,27 @@
 
         //console.log('API Base URL:', API_BASE_URL, '(Local Dev:', isLocalDev + ')');
 
+        // 带超时的fetch函数 (60秒超时，适应慢速API)
+        async function fetchWithTimeout(url, options = {}, timeout = 60000) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), timeout);
+            
+            try {
+                const response = await fetch(url, {
+                    ...options,
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                return response;
+            } catch (error) {
+                clearTimeout(timeoutId);
+                if (error.name === 'AbortError') {
+                    throw new Error(`请求超时 (${timeout/1000}秒)`);
+                }
+                throw error;
+            }
+        }
+
         async function testAPIConnection() {
             try {
                 const controller = new AbortController();
@@ -8253,9 +8282,9 @@
         let _serversLoadedOnce = false;
         async function loadServersFromAPI() {
             try {
-                // 创建带超时的 fetch controller
+                // 创建带超时的 fetch controller (30秒超时)
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 10000);
+                const timeoutId = setTimeout(() => controller.abort(), 30000);
                 
                 const response = await fetch(`${API_BASE_URL}/servers?t=${Date.now()}`, {
                     method: 'GET',
@@ -8343,10 +8372,15 @@
                     }
 
                 } else {
-                    console.warn('API返回数据格式异常:', data);
+                    // console.warn('API返回数据格式异常:', data);
                 }
             } catch (error) {
+                // 静默处理错误，不影响页面功能
                 console.error('加载服务器列表失败:', error);
+                // 如果是超时或网络错误，可以考虑重试
+                if (error.name === 'AbortError') {
+                    console.warn('服务器列表加载超时，将使用本地模式');
+                }
             }
         }
 
@@ -8890,12 +8924,12 @@
             try {
                 // 检查 API_BASE_URL 是否定义
                 if (typeof API_BASE_URL === 'undefined') {
-                    console.warn('API_BASE_URL 未定义，跳过服务器同步');
+                    // console.warn('API_BASE_URL 未定义，跳过服务器同步');
                     return false;
                 }
 
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 5000); // 5秒超时
+                const timeoutId = setTimeout(() => controller.abort(), 3000); // 3秒超时，更快失败
 
                 const response = await fetch(`${API_BASE_URL}/id-library`, {
                     method: 'GET',
@@ -8913,18 +8947,20 @@
                         idLibraryAccounts = data.accounts;
                         saveIdLibraryToStorage();
                         renderIdLibraryList();
+                        console.log('✓ ID库已从服务器同步');
                         return true;
                     }
                 } else {
-                    console.warn('从服务器同步ID库失败: HTTP', response.status);
+                    // console.warn('从服务器同步ID库失败: HTTP', response.status);
                 }
             } catch (e) {
                 // 静默处理错误，不影响本地功能
-                if (e.name === 'AbortError') {
-                    console.warn('从服务器同步ID库超时');
-                } else {
-                    console.warn('从服务器同步ID库失败:', e.message || e);
-                }
+                // 只在开发模式下输出详细错误
+                // if (e.name === 'AbortError') {
+                //     console.warn('从服务器同步ID库超时');
+                // } else {
+                //     console.warn('从服务器同步ID库失败:', e.message || e);
+                // }
             }
             return false;
         }
@@ -8934,12 +8970,12 @@
             try {
                 // 检查 API_BASE_URL 是否定义
                 if (typeof API_BASE_URL === 'undefined') {
-                    console.warn('API_BASE_URL 未定义，跳过服务器同步');
+                    // console.warn('API_BASE_URL 未定义，跳过服务器同步');
                     return false;
                 }
 
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10秒超时
+                const timeoutId = setTimeout(() => controller.abort(), 5000); // 5秒超时
 
                 const response = await fetch(`${API_BASE_URL}/id-library`, {
                     method: 'POST',
@@ -8962,19 +8998,19 @@
                 if (response.ok) {
                     const data = await response.json();
                     if (data.success) {
-                        console.log('ID库同步成功:', data.message);
+                        console.log('✓ ID库已同步到服务器');
                         return true;
                     }
                 } else {
-                    console.warn('同步ID库到服务器失败: HTTP', response.status);
+                    // console.warn('同步ID库到服务器失败: HTTP', response.status);
                 }
             } catch (e) {
                 // 静默处理错误，不影响本地功能
-                if (e.name === 'AbortError') {
-                    console.warn('同步ID库到服务器超时');
-                } else {
-                    console.warn('同步ID库到服务器失败:', e.message || e);
-                }
+                // if (e.name === 'AbortError') {
+                //     console.warn('同步ID库到服务器超时');
+                // } else {
+                //     console.warn('同步ID库到服务器失败:', e.message || e);
+                // }
             }
             return false;
         }
@@ -11111,12 +11147,12 @@
                 function connectToBackendWS(_serverIgnored) {
             // 零轮询架构：使用原生WebSocket实时推送，无任何HTTP轮询
             if (activeWs && activeWs.readyState === WebSocket.OPEN) {
-                console.log('[WebSocket] 已连接，跳过初始化');
+                // console.log('[WebSocket] 已连接，跳过初始化');
                 return;
             }
 
             if (!authToken || !currentUserId) {
-                console.warn('[WebSocket] 未登录，无法连接');
+                // console.warn('[WebSocket] 未登录，无法连接');
                 return;
             }
 
@@ -11125,14 +11161,14 @@
                 .replace('http://', 'ws://')
                 .replace('https://', 'wss://')
                 .replace('/api', '') + '/ws/frontend';
-            console.log('[WebSocket] 正在连接到:', wsUrl);
+            // console.log('[WebSocket] 正在连接到:', wsUrl);
 
             try {
                 // 使用原生WebSocket客户端
                 activeWs = new WebSocket(wsUrl);
 
                 activeWs.onopen = () => {
-                    console.log('[WebSocket] 连接成功！');
+                    console.log('✓ WebSocket已连接');
                     
                     // 使用 setTimeout 确保 WebSocket 状态完全同步
                     setTimeout(() => {
@@ -11147,7 +11183,7 @@
                         const msg = JSON.parse(event.data);
                         const msgType = msg.type;
                         
-                        console.log('[WebSocket] 收到消息:', msgType, msg);
+                        // console.log('[WebSocket] 收到消息:', msgType, msg);
 
                         // 处理不同类型的消息
                         if (msgType === 'task_update') {
@@ -11157,34 +11193,34 @@
                         } else if (msgType === 'inbox_update') {
                             handleServerMessage(msg, null);
                         } else if (msgType === 'subscribed') {
-                            console.log('[WebSocket] 任务订阅成功:', msg);
+                            // console.log('[WebSocket] 任务订阅成功:', msg);
                         } else if (msgType === 'user_subscribed') {
-                            console.log('[WebSocket] 用户订阅成功:', msg);
+                            console.log('✓ 用户订阅成功');
                         } else if (msgType === 'unsubscribed') {
-                            console.log('[WebSocket] 取消订阅:', msg);
+                            // console.log('[WebSocket] 取消订阅:', msg);
                         } else if (msgType === 'pong') {
                             // 心跳响应
                         } else if (msgType === 'error') {
-                            console.error('[WebSocket] 服务器错误:', msg.message);
+                            console.error('[WebSocket] 错误:', msg.message);
                         }
                     } catch (e) {
-                        console.error('[WebSocket] 消息解析失败:', e, event.data);
+                        console.error('[WebSocket] 消息解析失败:', e);
                     }
                 };
 
                 activeWs.onerror = (error) => {
-                    console.error('[WebSocket] 连接错误:', error);
-                    showMessage('连接失败，正在重试...', 'warning');
+                    // console.error('[WebSocket] 连接错误:', error);
+                    // showMessage('连接失败，正在重试...', 'warning');
                 };
 
                 activeWs.onclose = (event) => {
-                    console.log('[WebSocket] 断开连接:', event.code, event.reason);
+                    // console.log('[WebSocket] 断开连接:', event.code, event.reason);
                     activeWs = null;
                     
                     // 5秒后自动重连
                     setTimeout(() => {
                         if (!activeWs && authToken && currentUserId) {
-                            console.log('[WebSocket] 尝试重连...');
+                            // console.log('[WebSocket] 尝试重连...');
                             connectToBackendWS(_serverIgnored);
                         }
                     }, 5000);
@@ -11199,7 +11235,7 @@
 
         function sendWSCommand(action, data = {}) {
             if (!activeWs || activeWs.readyState !== WebSocket.OPEN) {
-                console.warn('[WebSocket] 未连接，无法发送命令:', action);
+                // console.warn('[WebSocket] 未连接，无法发送命令:', action);
                 return false;
             }
             const payload = JSON.stringify({ action, data });
@@ -12936,7 +12972,7 @@
             }
 
             if (!checkAuth()) {
-                console.warn('未登录，跳过初始化');
+                // console.warn('未登录，跳过初始化');
                 return;
             }
 
@@ -12945,9 +12981,12 @@
             updateButtonState();
             updateConnectionStatus(false);
             resetInboxOnConnect();
-            loadServersFromAPI();
+            
+            // 异步加载服务器数据，不阻塞UI
+            loadServersFromAPI().catch(() => {});
             connectToAssignedServers();
             connectToAvailableServers();
+            
             const statusList = document.getElementById('statusList');
             if (statusList) {
                 statusList.innerHTML = '';
