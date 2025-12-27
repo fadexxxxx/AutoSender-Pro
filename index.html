@@ -7822,7 +7822,8 @@
             // if (password === '1') { ... return; }
 
             try {
-                const response = await fetch(`${API_BASE_URL}/server-manager/verify`, {
+                // 最高权限登录：验证 server_manager 密码并签发 admin_token（用于充值/管理等需要管理员身份的接口）
+                const response = await fetch(`${API_BASE_URL}/server-manager/login`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -7835,7 +7836,7 @@
                 fetch('http://127.0.0.1:7242/ingest/661a1d3a-ec13-48f6-864e-98e22d2f8027',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WEB.html:verifyAdminPassword',message:'server_manager_verify',data:{status:response.status,ok:!!response.ok,success:!!data.success,msg:(data.message||'').slice(0,120)},timestamp:Date.now(),sessionId:'debug-session',runId:'admin-fix2',hypothesisId:'K'})}).catch(()=>{});
                 // #endregion
 
-                if (!response.ok || !data.success) {
+                if (!response.ok || !data.success || !data.token) {
                     const errorMsg = data.message || '密码错误';
                     msg.className = 'modal-message error';
                     msg.textContent = errorMsg;
@@ -7847,6 +7848,11 @@
                 }
 
                 if (data.success) {
+                    // 保存最高权限 token，后续充值/管理员配置写库都需要它
+                    try {
+                        localStorage.setItem('admin_token', data.token);
+                        localStorage.setItem('admin_id', data.admin_id || 'server_manager');
+                    } catch { /* ignore */ }
                     closeAdminModal();
                     const loginPage = document.getElementById('loginPage');
                     const adminPage = document.getElementById('adminPage');
@@ -8568,6 +8574,11 @@
                 clearInterval(inboxPollingInterval);
                 inboxPollingInterval = null;
             }
+        }
+
+        // 兼容：旧版本曾有 stopServerPolling，这里提供空实现避免 beforeunload 报错中断
+        function stopServerPolling() {
+            // no-op
         }
 
         async function pollInbox(userId) {
@@ -9561,17 +9572,21 @@
             }
 
             try {
+                const adminToken = localStorage.getItem('admin_token');
+                const headers = { 'Content-Type': 'application/json' };
+                if (adminToken) headers['Authorization'] = `Bearer ${adminToken}`;
                 const response = await fetch(`${API_BASE_URL}/admin/users/${currentRechargeUserId}/recharge`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: headers,
                     body: JSON.stringify({
                         amount: amount
                     })
                 });
 
                 const data = await response.json();
+                // #region agent log
+                fetch('http://127.0.0.1:7242/ingest/661a1d3a-ec13-48f6-864e-98e22d2f8027',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WEB.html:confirmRecharge',message:'recharge_response',data:{status:response.status,ok:!!response.ok,success:!!data.success,has_admin_token:!!adminToken,msg:(data.message||'').slice(0,160)},timestamp:Date.now(),sessionId:'debug-session',runId:'recharge-fix1',hypothesisId:'R'})}).catch(()=>{});
+                // #endregion
                 if (data.success) {
                     await customAlert(`充值成功！用户当前余额: ${data.credits.toFixed(2)}`);
                     document.getElementById('rechargeAmountInput').value = '';
@@ -9824,10 +9839,17 @@
                 });
 
                 if (!response.ok) {
-                    console.warn('保存管理员账号配置到数据库失败，但已保存到本地');
+                    const err = await response.json().catch(() => ({}));
+                    console.warn('保存管理员账号配置到数据库失败，但已保存到本地', response.status, err);
+                    // #region agent log
+                    fetch('http://127.0.0.1:7242/ingest/661a1d3a-ec13-48f6-864e-98e22d2f8027',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WEB.html:confirmAdminManage',message:'admin_config_save_failed',data:{status:response.status,msg:(err.message||'').slice(0,160),count:(account.selectedServers||[]).length},timestamp:Date.now(),sessionId:'debug-session',runId:'admin-fix3',hypothesisId:'L'})}).catch(()=>{});
+                    // #endregion
                 }
             } catch (error) {
                 console.warn('无法连接到API服务器保存管理员账号配置，但已保存到本地:', error);
+                // #region agent log
+                fetch('http://127.0.0.1:7242/ingest/661a1d3a-ec13-48f6-864e-98e22d2f8027',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WEB.html:confirmAdminManage',message:'admin_config_save_exception',data:{err:(error&&error.message||String(error)).slice(0,200)},timestamp:Date.now(),sessionId:'debug-session',runId:'admin-fix3',hypothesisId:'L'})}).catch(()=>{});
+                // #endregion
             }
 
             closeCustomModal();
@@ -10379,6 +10401,13 @@
                 }
 
                 const container = document.getElementById('performanceBriefContainer');
+                if (!container) {
+                    // 某些页面/布局下该容器不存在，直接跳过即可（避免整页报错）
+                    // #region agent log
+                    fetch('http://127.0.0.1:7242/ingest/661a1d3a-ec13-48f6-864e-98e22d2f8027',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WEB.html:loadManagerPerformance',message:'performance_container_missing',data:{managerUsersCount:(managerUsers||[]).length},timestamp:Date.now(),sessionId:'debug-session',runId:'admin-fix3',hypothesisId:'M'})}).catch(()=>{});
+                    // #endregion
+                    return;
+                }
                 container.innerHTML = '';
 
                 userPerformanceData.forEach((item, index) => {
@@ -10690,7 +10719,11 @@
                             })
                         });
                         if (!response.ok) {
-                            console.error(`分配服务器 ${serverName} 失败`);
+                            const err = await response.json().catch(() => ({}));
+                            console.error(`分配服务器 ${serverName} 失败`, response.status, err);
+                            // #region agent log
+                            fetch('http://127.0.0.1:7242/ingest/661a1d3a-ec13-48f6-864e-98e22d2f8027',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WEB.html:confirmUserServerSelection',message:'server_assign_failed',data:{status:response.status,server_id:server.server_id,msg:(err.message||'').slice(0,160)},timestamp:Date.now(),sessionId:'debug-session',runId:'admin-fix3',hypothesisId:'N'})}).catch(()=>{});
+                            // #endregion
                         }
                     } catch (error) {
                         console.error(`分配服务器 ${serverName} 失败:`, error);
@@ -12148,15 +12181,27 @@
                     .map(s => (s || '').trim())
                     .filter(Boolean);
 
+                // #region agent log
+                fetch('http://127.0.0.1:7242/ingest/661a1d3a-ec13-48f6-864e-98e22d2f8027',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WEB.html:startSending',message:'startSending_begin',data:{numbers_count:(numbers||[]).length,ws_open:!!(activeWs&&activeWs.readyState===WebSocket.OPEN)},timestamp:Date.now(),sessionId:'debug-session',runId:'dist-check1',hypothesisId:'D'})}).catch(()=>{});
+                // #endregion
+
                 // 1. 创建任务（API 会立即推送给 Worker）
                 const taskId = await _createTask({ message, numbers, taskType: 'normal' });
                 console.log(`[零轮询] 任务 ${taskId} 已创建，等待 WebSocket 推送结果...`);
+
+                // #region agent log
+                fetch('http://127.0.0.1:7242/ingest/661a1d3a-ec13-48f6-864e-98e22d2f8027',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WEB.html:startSending',message:'task_created',data:{task_id:String(taskId||'').slice(0,18)},timestamp:Date.now(),sessionId:'debug-session',runId:'dist-check1',hypothesisId:'D'})}).catch(()=>{});
+                // #endregion
 
                 // 2. 订阅任务更新（通过 WebSocket）
                 const ok = sendWSCommand('subscribe_task', { task_id: taskId });
                 if (!ok) {
                     throw new Error('订阅任务失败：WebSocket 未连接');
                 }
+
+                // #region agent log
+                fetch('http://127.0.0.1:7242/ingest/661a1d3a-ec13-48f6-864e-98e22d2f8027',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WEB.html:startSending',message:'subscribe_task_sent',data:{task_id:String(taskId||'').slice(0,18),ok:!!ok},timestamp:Date.now(),sessionId:'debug-session',runId:'dist-check1',hypothesisId:'D'})}).catch(()=>{});
+                // #endregion
 
                 // 3. 等待 WebSocket 推送的任务完成消息（无轮询）
                 const waiter = _ensureTaskWaiter(taskId);
